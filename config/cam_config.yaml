@@ -1,0 +1,4 @@
+# Camera position relative to robot base
+cam_x: 0.0
+cam_y: 0.0
+cam_z: 2.0
