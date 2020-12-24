@@ -2,16 +2,23 @@ cmake_minimum_required(VERSION 3.0.2)
 project(brobot_cam)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  geometry_msgs
   roscpp
   std_msgs
+  geometry_msgs
+  sensor_msgs
+  cv_bridge
+  image_transport
+  tf
 )
+
+find_package(realsense2 REQUIRED)
+find_package(OpenCV REQUIRED)
 
 ###################################
 ## catkin specific configuration ##
@@ -37,8 +44,12 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 # executables 
 add_executable( orientation_to_pose src/orientation_to_pose.cpp)
 target_link_libraries( orientation_to_pose ${catkin_LIBRARIES})
+
+add_executable( realsense src/realsense.cpp)
+target_link_libraries( realsense ${catkin_LIBRARIES} ${realsense2_LIBRARY} ${OpenCV_LIBS})
