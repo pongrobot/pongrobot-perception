@@ -2,7 +2,7 @@
 ROS package for processing camera related inputs for the brobot pong robot. Includes arduino code for reading IMU orientation from the MPU6050 and publishing into ROS.
 
 ## Node Descriptions
-- orientation_to_pose - read orientation from MPU6050 using DPM and publish over rosserial
+- orientation_to_pose - read DMP orientation from MPU6050 using rosserial, add frame and x,y,z data. Publish StampedPose data
 - realsense - low budget ros wrapper for D415 realsense camera with color alignment. It has less functionality than the realsense_camera package but it's more simple to use and isn't currently failing most of it's integration tests for Noetic
 
 ## Dependencies
@@ -11,6 +11,8 @@ ROS package for processing camera related inputs for the brobot pong robot. Incl
 - rosserial
 - tf2
 - image_transport
+- rosserial-arduino
+- I2CDEV/MPU6050 
 
 ## Published Topics
 - `/camera/info [sensor_msgs/CameraInfo]` - camera intrinsics and metadata for all camera data
@@ -19,6 +21,7 @@ ROS package for processing camera related inputs for the brobot pong robot. Incl
 - `/camera/depth_raw [sensor_msgs/Image]` - 16Uc1 depth data aligned to color in mm (openni)
 - `/camera/depth_map [sensor_msgs/Image]` - [OPTIONAL] bgr8 colorized representation of depth data for visualization 
 - `/camera/imu_orientation [geomtry_msgs/Orientation` - camera orientation from external IMU for transform using DPM
+- `/camera/imu_pose [geometry_msgs/StampedPose]` - camera pose for debugging, will be revised with real transform
 
 ## Config Options
 Camera configuration options are available in `config/cam_config.yaml`. In launch files, all config options are loaded as params at `/camera/*`.
