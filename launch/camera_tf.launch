@@ -1,0 +1,8 @@
+<launch>
+    <group ns="camera">
+        <rosparam file="$(find brobot_vision)/config/cam_config.yaml" />
+        <node name="camera_tf_broadcaster" pkg="brobot_vision" type="camera_tf_broadcaster" />
+        <node name="serial" pkg="rosserial_python" type="serial_node.py" args="/dev/ttyACM0" />
+        <node type="rviz" name="rviz" pkg="rviz" args="-d $(find brobot_vision)/rviz/imu_pose.rviz" />
+    </group>
+</launch>

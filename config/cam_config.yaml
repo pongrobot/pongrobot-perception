@@ -3,7 +3,8 @@ cam_x: 0.0
 cam_y: 0.0
 cam_z: 2.0
 
-image_frame_id: image_frame # image frame with depth as Z 
+image_frame_id: image # image frame with depth as Z 
 camera_frame_id: camera_link # camera frame with vertical z
+robot_frame_id: brobot # robot frame with vertical z
 enable_depth_map: False #publish rs2 colorized depth image for visualization
 

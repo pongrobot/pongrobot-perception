@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>brobot_cam</name>
-  <version>0.0.0</version>
+  <name>brobot_vision</name>
+  <version>0.0.1</version>
   <description>Pacakge to handle camera data for the brobot pong robot</description>
 
   <maintainer email="andrew@andrewtgutierrez.com">Andrew Gutierrez</maintainer>

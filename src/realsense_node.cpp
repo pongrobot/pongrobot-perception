@@ -16,7 +16,7 @@ int main(int argc, char **argv)
    
     // Read params 
     std::string camera_frame_id = "camera_link"; n.getParam("camera_frame_id", camera_frame_id);
-    std::string image_frame_id = "image_frame"; n.getParam("image_frame_id", image_frame_id);
+    std::string image_frame_id = "image"; n.getParam("image_frame_id", image_frame_id);
     bool enable_depth_map = true; n.getParam("enable_depth_map", enable_depth_map);
 
     // Publishers

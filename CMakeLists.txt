@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(brobot_cam)
+project(brobot_vision)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
@@ -31,7 +31,7 @@ find_package(OpenCV REQUIRED)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES brobot_cam
+#  LIBRARIES brobot_vision
 #  CATKIN_DEPENDS geometry_msgs roscpp std_msgs
 #  DEPENDS system_lib
 )
@@ -48,8 +48,8 @@ include_directories(
 )
 
 # executables 
-add_executable( orientation_to_pose src/orientation_to_pose.cpp)
-target_link_libraries( orientation_to_pose ${catkin_LIBRARIES})
+add_executable( camera_tf_broadcaster src/camera_tf_broadcaster.cpp)
+target_link_libraries( camera_tf_broadcaster ${catkin_LIBRARIES})
 
-add_executable( realsense src/realsense.cpp)
-target_link_libraries( realsense ${catkin_LIBRARIES} ${realsense2_LIBRARY} ${OpenCV_LIBS})
+add_executable( realsense_node src/realsense_node.cpp)
+target_link_libraries( realsense_node ${catkin_LIBRARIES} ${realsense2_LIBRARY} ${OpenCV_LIBS})
