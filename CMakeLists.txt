@@ -53,3 +53,6 @@ target_link_libraries( camera_tf_broadcaster ${catkin_LIBRARIES})
 
 add_executable( realsense_node src/realsense_node.cpp)
 target_link_libraries( realsense_node ${catkin_LIBRARIES} ${realsense2_LIBRARY} ${OpenCV_LIBS})
+
+add_executable( cup_detector_node src/cup_detector_node.cpp)
+target_link_libraries( cup_detector_node ${catkin_LIBRARIES} ${OpenCV_LIBS})

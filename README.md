@@ -2,9 +2,11 @@
 ROS package for processing camera related inputs for the brobot pong robot. Includes arduino code for reading IMU orientation from the MPU6050 and publishing into ROS.
 
 ## Node Descriptions
-- camera_tf_broadcaster - read DMP orientation from MPU6050 using rosserial and broadcast the transform from camera frame to robot frame with translation data from config. This is a static tf because the camera should be relativly static during use
+- `camera_tf_broadcaster` - read DMP orientation from MPU6050 using rosserial and broadcast the transform from camera frame to robot frame with translation data from config. This is a static tf because the camera should be relativly static during use
   
-- realsense_node - low budget ros wrapper for D415 realsense camera with color alignment. It has less functionality than the realsense_camera package but it's more simple to use and isn't currently failing most of it's integration tests for Noetic
+- `realsense_node` - low budget ros wrapper for D415 realsense camera with color alignment. It has less functionality than the realsense_camera package but it's more simple to use and isn't currently failing most of it's integration tests for Noetic
+
+- `cup_detector_node` - process the depth/color frames and publish a PoseArray of cups in the camera frame. [In progress]
 
 ## Dependencies
 - OpenCV4 and ros cv_bridge

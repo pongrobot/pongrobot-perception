@@ -11,7 +11,7 @@
 int main(int argc, char **argv)
 {
     // ROS setup
-    ros::init(argc, argv, "realsense");
+    ros::init(argc, argv, "realsense_node");
     ros::NodeHandle n;
    
     // Read params 
