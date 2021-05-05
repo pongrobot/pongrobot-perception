@@ -1,10 +1,14 @@
 # Camera position relative to robot base (m)
 cam_x: 0.0
 cam_y: 0.0
-cam_z: 2.0
+cam_z: 0.0
 
+# Coordinate frames
 image_frame_id: image # image frame with depth as Z 
 camera_frame_id: camera_link # camera frame with vertical z
 robot_frame_id: brobot # robot frame with vertical z
 enable_depth_map: False #publish rs2 colorized depth image for visualization
 
+# Cup detector parameters
+clipping_max_depth: 2.0 # background clipping dist in meters
+clipping_min_depth: 1.0 # foreground clipping dist in meters

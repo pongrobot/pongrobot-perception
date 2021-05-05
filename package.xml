@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>brobot_vision</name>
+  <name>pongrobot_vision</name>
   <version>0.0.1</version>
   <description>Pacakge to handle camera data for the brobot pong robot</description>
 
@@ -17,5 +17,7 @@
   <depend>cv_bridge</depend>
   <depend>tf</depend>
   <depend>librealsense2</depend>
+  <build_depend>libpcl-all-dev</build_depend>
+  <exec_depend>libpcl-all</exec_depend>
 
 </package>

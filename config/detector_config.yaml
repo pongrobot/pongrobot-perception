@@ -1,0 +1,11 @@
+# Passthrough Filter params
+passthrough_max_depth: 2.0 # background clipping dist in meters
+passthrough_min_depth: 0.0 # foreground clipping dist in meters
+
+# Plane Detection params
+eps_angle: 0.2 # EPS angle in Radians
+distance_threshold: 0.02 # how close a point must be to be an inlier in metere (REP 103)
+
+# CubeBox Filter params
+cube_box_min_height: 0.04 # how far above the detected table to put the bottom of the box (should similar to distance_threshold) 
+cube_box_max_height: 0.2 # how far above the detected table to put the top of the box, should be greater than the cup height
