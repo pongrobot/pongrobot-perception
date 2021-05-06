@@ -9,7 +9,6 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   geometry_msgs
   sensor_msgs
-  cv_bridge
   image_transport
   tf
   pcl_ros
@@ -40,13 +39,13 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
 # include
+  include
   ${catkin_INCLUDE_DIRS}
-  ${OpenCV_INCLUDE_DIRS}
 )
 
 # executables 
-add_executable( camera_tf_broadcaster src/camera_tf_broadcaster.cpp)
-target_link_libraries( camera_tf_broadcaster ${catkin_LIBRARIES})
+add_executable( camera_tf_broadcaster src/camera_tf_broadcaster.cpp )
+target_link_libraries( camera_tf_broadcaster ${catkin_LIBRARIES} )
 
-add_executable( 3D_cup_detector_node src/3D_cup_detector_node.cpp)
-target_link_libraries( 3D_cup_detector_node ${catkin_LIBRARIES} )
+add_executable( cup_detector_node src/cup_detector_node.cpp src/CupDetector.cpp )
+target_link_libraries( cup_detector_node ${catkin_LIBRARIES} )

@@ -33,7 +33,7 @@
     
     <group ns="detector">
         <rosparam file="$(find pongrobot_vision)/config/detector_config.yaml" />
-        <node name="cup_detector_node" pkg="pongrobot_vision" type="3D_cup_detector_node" output="screen" />
+        <node name="cup_detector_node" pkg="pongrobot_vision" type="cup_detector_node" output="screen" />
     </group>
 
 </launch>
