@@ -1,10 +1,20 @@
-# Passthrough Filter params
+# Filter params
 passthrough_max_depth: 1.7 # background clipping dist in meters
 passthrough_min_depth: 0.0 # foreground clipping dist in meters
-
-# Plane Detection params
-eps_angle: 0.2 # EPS angle in Radians
-distance_threshold: 0.02 # how close a point must be to be an inlier in metere (REP 103)
-
-# CubeBox Filter params
 obj_max_height: 0.2 # how far above the detected table to put the top of the box, should be greater than the cup height
+
+# Plane Segmentaion params
+eps_angle: 0.2 # EPS angle in Radians
+distance_threshold: 0.02 # how close a point must be to be an inlier in meters (REP 103)
+
+# Clustering Segmentaion params
+cluster_tolerance: 0.02  # in meters
+min_cluster_size: 100
+max_cluster_size: 25000
+
+# Debugging Flags
+publish_table_cloud: True # Show the detected table in red
+publish_table_poly: True # Show the bounds of the detected table 
+publish_obj_cloud: True # Show the objects on the table
+publish_cluster_cloud: True # Show the output of the clustering segmentation
+publish_cup_markers: True # Show the detected cups as cylinder markers
