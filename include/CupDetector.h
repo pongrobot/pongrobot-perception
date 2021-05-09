@@ -52,7 +52,7 @@ class CupDetector
         double max_cluster_size_;
 
         //Frame data
-        std::string robot_frame_id_;
+        std::string target_frame_id_;
         tf2_ros::Buffer tf_buffer_;
         tf2_ros::TransformListener tf_listener_;
 

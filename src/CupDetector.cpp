@@ -15,7 +15,7 @@ CupDetector( ros::NodeHandle nh ):
     nh.param<double>("cluster_tolerance", cluster_tolerance_, 0.02);
     nh.param<double>("min_cluster_size", min_cluster_size_, 100);
     nh.param<double>("max_cluster_size", max_cluster_size_, 25000);
-    nh.param<std::string>("robot_frame_id", robot_frame_id_, "brobot");
+    nh.param<std::string>("target_frame_id", target_frame_id_, "world");
 
     // Read in debugging flags
     nh.param<bool>("publish_table_cloud", publish_table_cloud_, true);
@@ -62,8 +62,8 @@ pointCloudCallback( const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& msg )
     try
     {
         // wait for the correct transform for up to 5 sec (supress startup errors)
-        tf_buffer_.lookupTransform(robot_frame_id_, msg->header.frame_id, ros::Time::now(), ros::Duration(5.0));
-        pcl_ros::transformPointCloud(robot_frame_id_, *msg, *cloud_, tf_buffer_);
+        tf_buffer_.lookupTransform(target_frame_id_, msg->header.frame_id, ros::Time::now(), ros::Duration(5.0));
+        pcl_ros::transformPointCloud(target_frame_id_, *msg, *cloud_, tf_buffer_);
     }
     catch (tf2::TransformException &ex)
     {
@@ -168,13 +168,13 @@ run()
                 // Setup visualization markers
                 visualization_msgs::MarkerArray cup_markers;
                 visualization_msgs::Marker clear_markers;
-                clear_markers.header.frame_id = robot_frame_id_;    
+                clear_markers.header.frame_id = target_frame_id_;    
                 clear_markers.action = visualization_msgs::Marker::DELETEALL;
                 cup_markers.markers.push_back(clear_markers);
     
                 // Cup pose output
                 geometry_msgs::PoseArray cup_pose_array;
-                cup_pose_array.header.frame_id = robot_frame_id_;
+                cup_pose_array.header.frame_id = target_frame_id_;
                 cup_pose_array.header.stamp = ros::Time();
 
                 // Iterate through clusters
@@ -246,7 +246,7 @@ buildTablePoly( pcl::PointXYZRGB minPt, pcl::PointXYZRGB maxPt )
     // Initialize message
     geometry_msgs::PolygonStamped table_poly;
     table_poly.header.stamp = ros::Time::now();
-    table_poly.header.frame_id = robot_frame_id_;
+    table_poly.header.frame_id = target_frame_id_;
     
     // build rectangle from extreme points 
     geometry_msgs::Point32 vertex;
@@ -278,7 +278,7 @@ CupDetector::
 buildCupMarker( int cup_index, Eigen::Vector4f centroid )
 {
     visualization_msgs::Marker marker;
-    marker.header.frame_id = robot_frame_id_;
+    marker.header.frame_id = target_frame_id_;
     marker.header.stamp = ros::Time();
     marker.ns = "cups";
     marker.id = cup_index;

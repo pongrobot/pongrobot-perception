@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   image_transport
   tf
+  tf2
   pcl_ros
 )
 
@@ -44,8 +45,8 @@ include_directories(
 )
 
 # executables 
-add_executable( camera_tf_broadcaster src/camera_tf_broadcaster.cpp )
-target_link_libraries( camera_tf_broadcaster ${catkin_LIBRARIES} )
+add_executable( tf_broadcaster src/tf_broadcaster.cpp )
+target_link_libraries( tf_broadcaster ${catkin_LIBRARIES} )
 
 add_executable( cup_detector_node src/cup_detector_node.cpp src/CupDetector.cpp )
 target_link_libraries( cup_detector_node ${catkin_LIBRARIES} )

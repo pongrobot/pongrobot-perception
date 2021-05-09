@@ -1,3 +1,6 @@
+# Frame to perform vision processing in
+target_frame_id: world
+
 # Filter params
 passthrough_max_depth: 1.7 # background clipping dist in meters
 passthrough_min_depth: 0.0 # foreground clipping dist in meters
