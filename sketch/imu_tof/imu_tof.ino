@@ -60,7 +60,7 @@ void loop()
   pose.position.y = 0;
   float rangeMm = range/1000.f;
   if ( rangeMm < 2.f )
-    pose.position.z = rangeMm;
+    pose.position.z = pose.position.z * 0.6+ 0.4 * rangeMm;
 
   pose_pub.publish( &pose );
   nh.spinOnce();
