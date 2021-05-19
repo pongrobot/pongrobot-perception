@@ -4,6 +4,7 @@
 #include <geometry_msgs/TransformStamped.h>
 #include "geometry_msgs/PoseStamped.h"
 #include <tf2/LinearMath/Quaternion.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 ros::Publisher stamped_pub;
 
@@ -17,10 +18,24 @@ std::string robot_base_frame_id = "robot_base";
 std::string robot_center_frame_id = "robot_center"; 
 std::string launcher_frame_id = "launcher"; 
 
-void poseCallback(const geometry_msgs::Pose& msg)
+void poseCallback(const geometry_msgs::Pose::ConstPtr& msg)
 {
     static tf2_ros::StaticTransformBroadcaster br;
 
+    // Extract Yaw
+    double roll, pitch, yaw;
+    tf2::Quaternion sensor_orientation;
+    tf2::convert(msg->orientation, sensor_orientation);
+    tf2::Matrix3x3 m(sensor_orientation);
+    m.getRPY(roll, pitch, yaw);
+    tf2::Quaternion yaw_only;
+    yaw_only.setRPY( 0, 0 , yaw );
+
+    // Remove yaw component from tf
+    tf2::Quaternion tf_quaternion;
+    tf_quaternion = sensor_orientation * yaw_only.inverse();
+    geometry_msgs::Quaternion rp_orientation = tf2::toMsg(tf_quaternion);
+    
     // Identity Quaternion
     geometry_msgs::Quaternion identity;
     identity.w = 1.f;
@@ -33,7 +48,7 @@ void poseCallback(const geometry_msgs::Pose& msg)
     world_robot_base_tf.transform.translation.x = 0.f;
     world_robot_base_tf.transform.translation.y = 0.f;
     world_robot_base_tf.transform.translation.z = 0.f;
-    world_robot_base_tf.transform.rotation = msg.orientation;
+    world_robot_base_tf.transform.rotation = rp_orientation;
     br.sendTransform(world_robot_base_tf);
 
     // broadcast robot base -> robot center transform 
@@ -43,7 +58,7 @@ void poseCallback(const geometry_msgs::Pose& msg)
     robot_base_center_tf.child_frame_id = robot_center_frame_id;
     robot_base_center_tf.transform.translation.x = 0.f;
     robot_base_center_tf.transform.translation.y = 0.f;
-    robot_base_center_tf.transform.translation.z = msg.position.z;
+    robot_base_center_tf.transform.translation.z = msg->position.z;
     robot_base_center_tf.transform.rotation = identity;
     br.sendTransform(robot_base_center_tf);
     
