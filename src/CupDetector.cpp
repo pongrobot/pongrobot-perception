@@ -31,7 +31,7 @@ CupDetector( ros::NodeHandle nh ):
     if ( publish_table_poly_ ) { table_poly_pub_ = nh.advertise<geometry_msgs::PolygonStamped> ("/detector/table", 1); }
     if ( publish_cluster_cloud_ ) { cluster_cloud_pub_ = nh.advertise<sensor_msgs::PointCloud2> ("/detector/cluster", 1); }
     if ( publish_cup_markers_ ) { marker_pub_ = nh.advertise<visualization_msgs::MarkerArray>( "/detector/cup_marker", 1 ); };
-    cup_pose_pub_ = nh.advertise<geometry_msgs::PoseArray>( "/detector/cup_pose", 1 );
+    cup_pose_pub_ = nh.advertise<geometry_msgs::PoseArray>( "/detector/cup_array", 1 );
     
     // Init clouds
     cloud_.reset( new pcl::PointCloud<pcl::PointXYZRGB>() ); 

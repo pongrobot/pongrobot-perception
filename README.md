@@ -14,6 +14,7 @@ ROS package for processing camera related inputs for the brobot pong robot. Incl
 ## Node Descriptions
 - `tf_broadcaster` - read DMP orientation from MPU6050 and height from VL53L0X using rosserial and broadcast all the transforms on the robot.
 - `cup_detector_node` - run the pointcloud based cup detection, takes in the point cloud published to `/camera/depth/color/points` and output a `geometry_msgs/PoseArray` containing the location of all detected cups. A variety of visualization and debugging tools are also provided. The majority of the source code is contained in the `CupDetector` object found in `src/CupDetector.cpp`.
+- `game_logic_node` - handle all the game logic for determining the state of the table, picking a target and requesting shot from the launcher. 
 
 ## Published Topics
 - `/detector/surface [sensor_msgs/PointCloud2]` - optional topic that publishes a point cloud that shows the detected table surface in red
@@ -21,7 +22,8 @@ ROS package for processing camera related inputs for the brobot pong robot. Incl
 - `/detector/obj [sensor_msgs/PointCloud2]` - optional topic that publishes the segmented objects sitting on the detected table
 - `/detector/cluster [sensor_msgs/PointCloud2]` - optional topic that publishes the output of the euclidean clustering algorithm on the objects with a new color for each cluster 
 - `/detector/cup_marker [visualization_msgs/MarkerArray]` - optional topic that publishes a cylinder marker at located at the centroid of each detected cup
-- `/detector/cup_pose [geometry_msgs/PoseArray]` - topic for the output of the cup detector, each element contains the centroid location of each detected cup ( published in robot frame)
+- `/detector/cup_array [geometry_msgs/PoseArray]` - topic for the output of the cup detector, each element contains the centroid location of each detected cup ( published in robot frame)
+- `/target_cup [geometry_msgs/PoseStamped]` - the topic for the target cup to hit, (published in launcher frame)
 
 ## Config Options
 Camera configuration options are available in `config/cam_config.yaml`. In launch files, all config options are loaded as params at `/camera/*`.
