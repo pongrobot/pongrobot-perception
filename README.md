@@ -1,4 +1,4 @@
-# pongrobot_vision
+# pongrobot_perception
 ROS package for processing camera related inputs for the brobot pong robot. Includes arduino code for reading IMU orientation from the MPU6050 and publishing into ROS.
 
 ## Dependencies

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>pongrobot_vision</name>
+  <name>pongrobot_perception</name>
   <version>0.0.1</version>
   <description>Package to handle camera data for the brobot pong robot</description>
 

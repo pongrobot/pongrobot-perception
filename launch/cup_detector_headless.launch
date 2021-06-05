@@ -25,14 +25,14 @@
             <arg name="tf_prefix"         value="$(arg camera)"/>
         </include>
 
-        <rosparam file="$(find pongrobot_vision)/config/cam_config.yaml" />
-        <node name="tf_broadcaster" pkg="pongrobot_vision" type="tf_broadcaster" />
+        <rosparam file="$(find pongrobot_perception)/config/cam_config.yaml" />
+        <node name="tf_broadcaster" pkg="pongrobot_perception" type="tf_broadcaster" />
         <node name="serial" pkg="rosserial_python" type="serial_node.py" args="/dev/ttyACM0" />
     </group>
     
     <group ns="detector">
-        <rosparam file="$(find pongrobot_vision)/config/detector_config.yaml" />
-        <node name="cup_detector_node" pkg="pongrobot_vision" type="cup_detector_node" output="screen" />
+        <rosparam file="$(find pongrobot_perception)/config/detector_config.yaml" />
+        <node name="cup_detector_node" pkg="pongrobot_perception" type="cup_detector_node" output="screen" />
     </group>
 
 </launch>
