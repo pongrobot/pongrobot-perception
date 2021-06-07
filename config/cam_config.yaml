@@ -1,7 +1,7 @@
 # Frame offsets in meters
-camera_x_offset: 0.07 # X offset from robot center to camera frame
-camera_Z_offset: 0.0 # Z offset from robot center to camera frame
-launcher_z_offset: 0.5 # Z offset from robot center to launcher frame 
+camera_x_offset: 0.24 # X offset from robot center to camera frame
+camera_Z_offset: 0.13 # Z offset from robot center to camera frame
+launcher_z_offset: 0.265 # Z offset from robot center to launcher frame 
 
 # New Coordinate Frames
 camera_frame_id: camera_link

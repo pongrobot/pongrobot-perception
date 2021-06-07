@@ -16,9 +16,11 @@
   <depend>sensor_msgs</depend>
   <depend>image_transport</depend>
   <depend>tf</depend>
+  <depend>tf2</depend>
   <build_depend>libpcl-all-dev</build_depend>
   <exec_depend>libpcl-all</exec_depend>
   <exec_depend>realsense2_camera</exec_depend>
   <exec_depend>rosserial_python</exec_depend>
+  <exec_depend>pongrobot_actuation</exec_depend>
 
 </package>

@@ -1,8 +1,8 @@
 <launch>
     <group ns="camera">
-        <rosparam file="$(find pongrobot_vision)/config/cam_config.yaml" />
-        <node name="tf_broadcaster" pkg="pongrobot_vision" type="tf_broadcaster" />
+        <rosparam file="$(find pongrobot_perception)/config/cam_config.yaml" />
+        <node name="tf_broadcaster" pkg="pongrobot_perception" type="tf_broadcaster" />
         <node name="serial" pkg="rosserial_python" type="serial_node.py" args="/dev/ttyACM0" />
-        <node type="rviz" name="rviz" pkg="rviz" args="-d $(find pongrobot_vision)/rviz/tf_viz.rviz" />
+        <node type="rviz" name="rviz" pkg="rviz" args="-d $(find pongrobot_perception)/rviz/tf_viz.rviz" />
     </group>
 </launch>
