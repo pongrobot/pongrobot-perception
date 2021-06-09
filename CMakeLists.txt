@@ -10,8 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   sensor_msgs
   image_transport
-  tf
-  tf2
+  tf2_ros
   pcl_ros
 )
 
