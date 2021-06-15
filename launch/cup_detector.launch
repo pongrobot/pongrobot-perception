@@ -27,7 +27,7 @@
 
         <rosparam file="$(find pongrobot_perception)/config/cam_config.yaml" />
         <node name="tf_broadcaster" pkg="pongrobot_perception" type="tf_broadcaster" />
-        <node name="serial" pkg="rosserial_python" type="serial_node.py" args="/dev/ttyACM0" />
+        <node name="serial" pkg="rosserial_python" type="serial_node.py" args="/dev/brobot_tf" />
         <node type="rviz" name="rviz" pkg="rviz" args="-d $(find pongrobot_perception)/rviz/cup_detector.rviz" />
     </group>
     
