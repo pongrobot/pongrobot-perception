@@ -37,6 +37,7 @@ class GameManager
         geometry_msgs::PoseStamped::Ptr target_cup_;
         int target_seq_id;
         bool has_ball_;
+        double cup_height_;
         
         // Utilities
         bool pickTarget();

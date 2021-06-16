@@ -10,6 +10,7 @@ GameManager( ros::NodeHandle nh ):
 
     // Pull in config data
     nh.param<std::string>("launcher_frame_id", target_frame_id_, "launcher");
+    nh.param<double>("cup_height", cup_height_, 0.01);
 
     cup_array_sub_ = nh_.subscribe<geometry_msgs::PoseArray>("/detector/cup_array", 1, &GameManager::cupArrayCallback, this);
     has_ball_sub_ = nh_.subscribe<std_msgs::Bool>("/launcher/has_ball", 1, &GameManager::hasBallCallback, this);
@@ -54,6 +55,7 @@ pickTarget( )
         {
             // wait for the correct transform for up to 3 sec
             geometry_msgs::PoseStamped launcher_cmd = tf_buffer_.transform(*target_cup_, target_frame_id_, ros::Duration(3.0) ); 
+            target_cup_->pose.position.z += cup_height_/2.f; // assuming detection is the centroid of the cup, aim for the top
             target_cup_pub_.publish(launcher_cmd);
             target_found = true;
         }
