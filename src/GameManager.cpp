@@ -15,7 +15,7 @@ GameManager( ros::NodeHandle nh ):
     nh.param<std::string>("launcher_frame_id", target_frame_id_, "launcher");
     response_timeout_ = ros::Duration(20.0);    
     calibration_timeout_ = ros::Duration(30.0);    
-    nh.param<double>("cup_height", cup_height_, 0.01);
+    nh.param<double>("cup_height", cup_height_, 0.1);
 
     // Setup Publishers and Subscribers
     cup_array_sub_ = nh_.subscribe<geometry_msgs::PoseArray>("/detector/cup_array", 1, &GameManager::cupArrayCallback, this);
@@ -183,6 +183,7 @@ run()
                 state_ = GameState::SHOOTING;
                 command_sent_ = ros::Time::now();
                 shot_success_ = false;
+                has_ball_ = false;
                 ROS_INFO("Transition AIMING->SHOOTING: Target found");
             }
             else
