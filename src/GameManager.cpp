@@ -7,6 +7,7 @@ GameManager( ros::NodeHandle nh ):
     has_ball_(false),
     shot_success_(false),
     calibration_request_(false),
+    restart_request_(false),
     state_(GameState::IDLE) //TODO: Initialize to calibrating when setup
 {
     nh_ = nh;
@@ -117,13 +118,13 @@ run()
             if (calibration_complete_)
             {
                 state_ = GameState::RESTARTING;
-                ROS_INFO("Transition CALIBRATING->RESTARTING: Calibration completed sucessfully");
+                ROS_INFO("[GameManager] CALIBRATING->RESTARTING: Calibration completed sucessfully");
             }
             else if (ros::Time::now() - calibration_sent_ > calibration_timeout_)
             {
                 // TODO: reload default params if possible
                 state_ = GameState::RESTARTING;
-                ROS_WARN("Transition CALIBRATING->RESTARTING: Calibration timed out, using default values");
+                ROS_WARN("[GameManager] CALIBRATING->RESTARTING: Calibration timed out, using default values");
             }
 
             break;
@@ -135,7 +136,7 @@ run()
             detector_restart_pub_.publish(restart);
 
             state_ = GameState::IDLE;
-            ROS_INFO("Transition RESTARTING->IDLE: Restart complete");
+            ROS_INFO("[GameManager] RESTARTING->IDLE: Restart complete");
             break;
         }
         case GameState::IDLE:
@@ -153,7 +154,7 @@ run()
                 calibration_complete_ = false;
                 restart_request_ = false; // Process restart command concurrently
                 state_ = GameState::CALIBRATING;
-                ROS_INFO("Transition IDLE->CALIBRATING: Received calibration request");
+                ROS_INFO("[GameManager] IDLE->CALIBRATING: Received calibration request");
             }
             
             // Process restart request
@@ -161,14 +162,14 @@ run()
             {
                 restart_request_ = false;
                 state_ = GameState::RESTARTING;
-                ROS_INFO("Transition IDLE->RESTARTING: Received restart request");
+                ROS_INFO("[GameManager] IDLE->RESTARTING: Received restart request");
             }
 
             // Check for ball
             if ( has_ball_ )
             {
                 state_ = GameState::AIMING;
-                ROS_INFO("Transition IDLE->AIMING: Ball detected");
+                ROS_INFO("[GameManager] IDLE->AIMING: Ball detected");
             }
 
             break;
@@ -184,11 +185,17 @@ run()
                 command_sent_ = ros::Time::now();
                 shot_success_ = false;
                 has_ball_ = false;
-                ROS_INFO("Transition AIMING->SHOOTING: Target found");
+                ROS_INFO("[GameManager] Sending Command: %.4f, %.4f, %.4f [%s]", 
+                                                    target_cup_.pose.position.x, 
+                                                    target_cup_.pose.position.y, 
+                                                    target_cup_.pose.position.z,
+                                                    target_cup_.header.frame_id.c_str());
+
+                ROS_INFO("[GameManager] AIMING->SHOOTING: Target found");
             }
             else
             {
-                ROS_WARN("Transition AIMING->IDLE: Target NOT found");
+                ROS_WARN("[GameManager] AIMING->IDLE: Target NOT found");
                 state_ = GameState::IDLE;
             }
 
@@ -198,12 +205,12 @@ run()
         {
             if (shot_success_)
             {
-                ROS_INFO("Transition SHOOTING->IDLE: Received shot confimation from launcher");
+                ROS_INFO("[GameManager] SHOOTING->IDLE: Received shot confirmation");
                 state_ = GameState::IDLE;  
             }
             else if  ( ros::Time::now() - command_sent_ > response_timeout_ )
             {
-                ROS_WARN("Transition SHOOTING->IDLE: Timed out waiting for launcher response");
+                ROS_WARN("[GameManager] SHOOTING->IDLE: Timed out waiting for launcher confirmation");
                 state_ = GameState::IDLE;  
             }
             break;
