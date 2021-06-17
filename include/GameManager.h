@@ -68,6 +68,7 @@ class GameManager
         ros::Time calibration_sent_;
         ros::Duration response_timeout_;
         ros::Duration calibration_timeout_;
+        double cup_height_;
         
         // Utilities
         bool pickTarget();
