@@ -66,7 +66,7 @@ class GameManager
         GameState state_; 
         ros::Time command_sent_;
         ros::Time calibration_sent_;
-        ros::Duration response_timeout_;
+        ros::Duration launcher_timeout_;
         ros::Duration calibration_timeout_;
         double cup_height_;
         

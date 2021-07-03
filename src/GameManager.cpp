@@ -13,10 +13,16 @@ GameManager( ros::NodeHandle nh ):
     nh_ = nh;
     
     // Pull in config data
-    nh.param<std::string>("launcher_frame_id", target_frame_id_, "launcher");
-    response_timeout_ = ros::Duration(20.0);    
-    calibration_timeout_ = ros::Duration(30.0);    
+    double launcher_timeout_val;
+    double calibration_timeout_val;
+
+    nh.param<std::string>("/frame/launcher_frame_id", target_frame_id_, "launcher");
     nh.param<double>("cup_height", cup_height_, 0.1);
+    nh.param<double>("launcher_timeout", launcher_timeout_val, 10.0);
+    nh.param<double>("calibration_timeout", calibration_timeout_val, 30.0);
+
+    launcher_timeout_ = ros::Duration(launcher_timeout_val);    
+    calibration_timeout_ = ros::Duration(calibration_timeout_val);    
 
     // Setup Publishers and Subscribers
     cup_array_sub_ = nh_.subscribe<geometry_msgs::PoseArray>("/detector/cup_array", 1, &GameManager::cupArrayCallback, this);
@@ -208,7 +214,7 @@ run()
                 ROS_INFO("[GameManager] SHOOTING->IDLE: Received shot confirmation");
                 state_ = GameState::IDLE;  
             }
-            else if  ( ros::Time::now() - command_sent_ > response_timeout_ )
+            else if  ( ros::Time::now() - command_sent_ > launcher_timeout_ )
             {
                 ROS_WARN("[GameManager] SHOOTING->IDLE: Timed out waiting for launcher confirmation");
                 state_ = GameState::IDLE;  

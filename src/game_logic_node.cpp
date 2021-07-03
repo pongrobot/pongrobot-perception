@@ -6,7 +6,11 @@ int main(int argc, char **argv)
     // ROS setup
     ros::init(argc, argv, "game_logic_node");
     ros::NodeHandle nh;
-    ros::Rate loop_rate(10); // run loop at 10Hz
+
+    float loop_frq;
+    nh.getParam("/rate/game", loop_frq);
+    ros::Rate loop_rate(loop_frq);
+
 
     // Create the GameManager object
     GameManager game_manager(nh);

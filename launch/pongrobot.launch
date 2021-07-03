@@ -31,10 +31,17 @@
         <node type="rviz" name="rviz" pkg="rviz" args="-d $(find pongrobot_perception)/rviz/pongrobot.rviz" />
     </group>
     
+    <rosparam file="$(find pongrobot_perception)/config/rate_config.yaml" ns="rate" />
+    <rosparam file="$(find pongrobot_perception)/config/frame_config.yaml" ns="frame" />
+
+    <group ns="game">
+        <rosparam file="$(find pongrobot_perception)/config/game_config.yaml" />
+        <node name="game_logic_node" pkg="pongrobot_perception" type="game_logic_node" output="screen" />
+    </group>
+
     <group ns="detector">
         <rosparam file="$(find pongrobot_perception)/config/detector_config.yaml" />
         <node name="cup_detector_node" pkg="pongrobot_perception" type="cup_detector_node" output="screen" />
-        <node name="game_logic_node" pkg="pongrobot_perception" type="game_logic_node" output="screen" />
     </group>
 
     <include file="$(find pongrobot_actuation)/launch/launcher_headless.launch" />

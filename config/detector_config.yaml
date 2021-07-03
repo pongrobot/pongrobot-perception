@@ -1,25 +1,22 @@
-# Frame to perform vision processing in
-target_frame_id: world
+target_frame_id: world # frame to perform vision processing in
 
-# Filter params
-passthrough_max_depth: 1.7 # background clipping dist in meters
-passthrough_min_depth: 0.0 # foreground clipping dist in meters
-obj_max_height: 0.2 # how far above the detected table to put the top of the box, should be greater than the cup height
-cup_height: 0.1 # height of a cup in meters
+# Initial filter paramters
+filter/passthrough_max_depth: 1.7 # background clipping dist in meters
+filter/passthrough_min_depth: 0.0 # foreground clipping dist in meters
+filter/object_max_height: 0.2 # how far above the detected table to put the top of the box, should be greater than the cup height
 
-# Plane Segmentaion params
-eps_angle: 0.2 # EPS angle in Radians
-distance_threshold: 0.02 # how close a point must be to be an inlier in meters (REP 103)
+# Plane segmentation parameters
+segment/eps_angle: 0.2 # EPS angle in Radians
+segment/distance_threshold: 0.02 # how close a point must be to be an inlier in meters (REP 103)
 
-# Clustering Segmentaion params
-cluster_tolerance: 0.007  # in meters
-min_cluster_size: 100
-max_cluster_size: 20000
+# Point clustering parameters
+cluster/tolerance: 0.007 # in meters
+cluster/min_cluster_size: 100 # smallest allowable point cluster
+cluster/max_cluster_size: 20000 # largest allowable point cluster
 
-# Debugging Flags
-publish_table_cloud: True # Show the detected table in red
-publish_table_poly: True # Show the bounds of the detected table 
-publish_obj_cloud: True # Show the objects on the table
-publish_cluster_cloud: True # Show the output of the clustering segmentation
-publish_cup_markers: True # Show the detected cups as cylinder markers
-
+# Debugging flags
+debug/publish_table_cloud: True # Show the detected table in red
+debug/publish_table_poly: True # Show the bounds of the detected table
+debug/publish_obj_cloud: True # Show the objects on the table
+debug/publish_cluster_cloud: True # Show the output of the clustering segmentation
+debug/publish_cup_markers: True # Show the detected cups as cylinder markers

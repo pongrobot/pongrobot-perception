@@ -1,4 +1,7 @@
 <launch>
+    <rosparam file="$(find pongrobot_perception)/config/rate_config.yaml" ns="rate" />
+    <rosparam file="$(find pongrobot_perception)/config/frame_config.yaml" ns="frame" />
+
     <group ns="camera">
         <rosparam file="$(find pongrobot_perception)/config/cam_config.yaml" />
         <node name="tf_broadcaster" pkg="pongrobot_perception" type="tf_broadcaster" />

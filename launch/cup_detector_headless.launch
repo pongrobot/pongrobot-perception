@@ -30,6 +30,9 @@
         <node name="serial" pkg="rosserial_python" type="serial_node.py" args="/dev/brobot_tf" />
     </group>
     
+    <rosparam file="$(find pongrobot_perception)/config/rate_config.yaml" ns="rate" />
+    <rosparam file="$(find pongrobot_perception)/config/frame_config.yaml" ns="frame" />
+
     <group ns="detector">
         <rosparam file="$(find pongrobot_perception)/config/detector_config.yaml" />
         <node name="cup_detector_node" pkg="pongrobot_perception" type="cup_detector_node" output="screen" />

@@ -7,22 +7,7 @@ CupDetector( ros::NodeHandle nh ):
     nh_ = nh;
 
     // Read in detector parameters
-    nh.param<double>("passthrough_max_depth", passthrough_max_depth_, 10.f);
-    nh.param<double>("passthrough_min_depth", passthrough_min_depth_, 0.f);
-    nh.param<double>("eps_angle", eps_angle_, 0.1);
-    nh.param<double>("distance_threshold", distance_threshold_, 0.1);
-    nh.param<double>("obj_max_height", obj_max_height_, 1.0);
-    nh.param<double>("cluster_tolerance", cluster_tolerance_, 0.02);
-    nh.param<double>("min_cluster_size", min_cluster_size_, 100);
-    nh.param<double>("max_cluster_size", max_cluster_size_, 25000);
-    nh.param<std::string>("target_frame_id", target_frame_id_, "world");
-
-    // Read in debugging flags
-    nh.param<bool>("publish_table_cloud", publish_table_cloud_, true);
-    nh.param<bool>("publish_table_poly", publish_table_poly_, true);
-    nh.param<bool>("publish_obj_cloud", publish_obj_cloud_, true);
-    nh.param<bool>("publish_cluster_cloud", publish_cluster_cloud_, true);
-    nh.param<bool>("publish_cup_markers", publish_cup_markers_, true);
+    load_params();        
 
     // Init Publishers and Subscribers
     cloud_sub_ = nh_.subscribe<pcl::PointCloud<pcl::PointXYZRGB>> ("/camera/depth/color/points", 1, &CupDetector::pointCloudCallback, this);
@@ -69,6 +54,26 @@ pointCloudCallback( const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& msg )
     {
         ROS_WARN("%s",ex.what());
     } 
+}
+
+void
+CupDetector::
+load_params()
+{
+    nh_.param<std::string>("target_frame_id", target_frame_id_, "world");
+    nh_.param<double>("filter/passthrough_max_depth", passthrough_max_depth_, 10.f);
+    nh_.param<double>("filer/passthrough_min_depth", passthrough_min_depth_, 0.f);
+    nh_.param<double>("filter/object_max_height", obj_max_height_, 1.0);
+    nh_.param<double>("segment/eps_angle", eps_angle_, 0.1);
+    nh_.param<double>("segment/distance_threshold", distance_threshold_, 0.1);
+    nh_.param<double>("cluster/tolerance", cluster_tolerance_, 0.02);
+    nh_.param<double>("cluster/min_cluster_size", min_cluster_size_, 100);
+    nh_.param<double>("cluster/max_cluster_size", max_cluster_size_, 25000);
+    nh_.param<bool>("debug/publish_table_cloud", publish_table_cloud_, true);
+    nh_.param<bool>("debug/publish_table_poly", publish_table_poly_, true);
+    nh_.param<bool>("debug/publish_obj_cloud", publish_obj_cloud_, true);
+    nh_.param<bool>("debug/publish_cluster_cloud", publish_cluster_cloud_, true);
+    nh_.param<bool>("debug/publish_cup_markers", publish_cup_markers_, true);
 }
 
 void

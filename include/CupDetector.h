@@ -29,6 +29,7 @@ class CupDetector
     public:
         CupDetector( ros::NodeHandle nh );
         void run();
+        void load_params();
 
     private:
         // Ros data

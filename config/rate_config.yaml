@@ -1,0 +1,4 @@
+# Node rate config values
+detector: 10.0 # rate to run the cup detector note (hz)
+game: 10.0 # rate to run the game node at (hz)
+tf_broadcast: 20.0 # rate to run the game node at (hz)
