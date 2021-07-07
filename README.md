@@ -59,6 +59,15 @@ Launchfiles can be found under `/launch` and coordinate running the required nod
 - `cup_detector.launch` - main node to launch the camera, cup detector and a visualization of the detected cups. If enabled, the additional visualization/debugging data is already configured in rviz although some may be hidden initially.
 - `cup_detector.launch` - the same  as `cup_detector` without the visualization. Intended to run on the Raspberry Pi running without a display
 
+### Running as a Background Service
+The launch files can be installed as a system service, to run in the background on startup. This is managed using the [robot_upstart](http://wiki.ros.org/robot_upstart) package. 
+
+The `/launch/scripts/` folder contains several scripts to manage this process:
+- `install_service.sh` uses `robot_upstart` to install a system service that will run `pongrobot_headless.launch`.
+- `start_service.sh` starts the system service. This setting persists across restarts.
+- `stop_service.sh` stops the system service. This setting persists across restarts. Run this command before you manually run any launch files, to prevent the background service conflicting.
+- `uninstall_service.sh` uninstalls the system service. Only needed if the configuration in `install_service.sh` is changed.
+
 ## Cup Detector Pipeline
 Here is a high level overview of the point cloud processing pipeline used to detect the cups in the `cup_detector_node`.
 1. __Transform to Robot frame:__ The first step is to pull down the transform from the IMU to make sure the cloud is properly aligned with the ground. This will make it easier to detect the table going forward.
