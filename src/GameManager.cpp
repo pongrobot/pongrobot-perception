@@ -12,17 +12,7 @@ GameManager( ros::NodeHandle nh ):
 {
     nh_ = nh;
     
-    // Pull in config data
-    double launcher_timeout_val;
-    double calibration_timeout_val;
-
-    nh.param<std::string>("/frame/launcher_frame_id", target_frame_id_, "launcher");
-    nh.param<double>("cup_height", cup_height_, 0.1);
-    nh.param<double>("launcher_timeout", launcher_timeout_val, 10.0);
-    nh.param<double>("calibration_timeout", calibration_timeout_val, 30.0);
-
-    launcher_timeout_ = ros::Duration(launcher_timeout_val);    
-    calibration_timeout_ = ros::Duration(calibration_timeout_val);    
+    loadParams();
 
     // Setup Publishers and Subscribers
     cup_array_sub_ = nh_.subscribe<geometry_msgs::PoseArray>("/detector/cup_array", 1, &GameManager::cupArrayCallback, this);
@@ -111,6 +101,36 @@ pickTarget( )
     }
 
     return target_found;
+}
+
+void
+GameManager::
+loadParams()
+{
+    if ( !nh_.getParam("/frame/launcher_frame_id", target_frame_id_) )
+    {
+        ROS_WARN("GameManager cannot load param: /frame/launcher_frame_id");
+    }
+
+    if ( !nh_.getParam("cup_height", cup_height_) )
+    {
+        ROS_WARN("GameManager cannot load param: %s/cup_height", nh_.getNamespace().c_str() );
+    }
+
+    double launcher_timeout_val;
+    if ( !nh_.getParam("launcher_timeout", launcher_timeout_val) )
+    {
+        ROS_WARN("GameManager cannot load param: %s/launcher_timeout", nh_.getNamespace().c_str() );
+    }
+    launcher_timeout_ = ros::Duration(launcher_timeout_val);    
+    
+    double calibration_timeout_val;
+    if ( !nh_.getParam("calibration_timeout", calibration_timeout_val) )
+    {
+        ROS_WARN("GameManager cannot load param: %s/calibration_timeout", nh_.getNamespace().c_str() );
+    }
+    calibration_timeout_ = ros::Duration(calibration_timeout_val);    
+
 }
 
 void

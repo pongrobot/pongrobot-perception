@@ -72,6 +72,7 @@ class GameManager
         
         // Utilities
         bool pickTarget();
+        void loadParams();
 };
 
 #endif

@@ -6,6 +6,6 @@ robot_center_frame_id: robot_center
 launcher_frame_id: launcher
 
 # Geometric fixed frame offsets
-geometry/camera_x_offset: 0.132 # X offset from robot center to camera frame
-geometry/camera_z_offset: 0.129 # Z offset from robot center to camera frame
+geometry/camera_x_offset: 0.133 # X offset from robot center to camera frame
+geometry/camera_z_offset: 0.127 # Z offset from robot center to camera frame
 geometry/launcher_z_offset: 0.2765 # Z offset from robot center to launcher frame 

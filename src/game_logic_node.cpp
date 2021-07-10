@@ -8,9 +8,11 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
 
     float loop_frq;
-    nh.getParam("/rate/game", loop_frq);
+    if ( !nh.getParam("/rate/game", loop_frq) )
+    {
+        ROS_ERROR("GameManager cannot load param: /rate/game");
+    }
     ros::Rate loop_rate(loop_frq);
-
 
     // Create the GameManager object
     GameManager game_manager(nh);

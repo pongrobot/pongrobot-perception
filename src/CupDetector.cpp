@@ -60,20 +60,75 @@ void
 CupDetector::
 load_params()
 {
-    nh_.param<std::string>("target_frame_id", target_frame_id_, "world");
-    nh_.param<double>("filter/passthrough_max_depth", passthrough_max_depth_, 10.f);
-    nh_.param<double>("filer/passthrough_min_depth", passthrough_min_depth_, 0.f);
-    nh_.param<double>("filter/object_max_height", obj_max_height_, 1.0);
-    nh_.param<double>("segment/eps_angle", eps_angle_, 0.1);
-    nh_.param<double>("segment/distance_threshold", distance_threshold_, 0.1);
-    nh_.param<double>("cluster/tolerance", cluster_tolerance_, 0.02);
-    nh_.param<double>("cluster/min_cluster_size", min_cluster_size_, 100);
-    nh_.param<double>("cluster/max_cluster_size", max_cluster_size_, 25000);
-    nh_.param<bool>("debug/publish_table_cloud", publish_table_cloud_, true);
-    nh_.param<bool>("debug/publish_table_poly", publish_table_poly_, true);
-    nh_.param<bool>("debug/publish_obj_cloud", publish_obj_cloud_, true);
-    nh_.param<bool>("debug/publish_cluster_cloud", publish_cluster_cloud_, true);
-    nh_.param<bool>("debug/publish_cup_markers", publish_cup_markers_, true);
+    if ( !nh_.getParam("target_frame_id", target_frame_id_) )
+    {
+        ROS_ERROR("CupDetector cannot load param: %s/target_frame_id", nh_.getNamespace().c_str() );
+    }
+
+    if ( !nh_.getParam("filter/passthrough_max_depth", passthrough_max_depth_) )
+    {
+        ROS_ERROR("CupDetector cannot load param: %s/filter/passthrough_max_depth", nh_.getNamespace().c_str() );
+    }
+
+    if ( !nh_.getParam("filter/passthrough_min_depth", passthrough_min_depth_) )
+    {
+        ROS_ERROR("CupDetector cannot load param: %s/filer/passthrough_min_depth", nh_.getNamespace().c_str() );
+    }
+
+    if ( !nh_.getParam("filter/object_max_height", obj_max_height_) )
+    {
+        ROS_ERROR("CupDetector cannot load param: %s/filter/object_max_height", nh_.getNamespace().c_str() );
+    }
+
+    if ( !nh_.getParam("segment/eps_angle", eps_angle_) )
+    {
+        ROS_ERROR("CupDetector cannot load param: %s/segment/eps_angle", nh_.getNamespace().c_str() );
+    }
+
+    if ( !nh_.getParam("segment/distance_threshold", distance_threshold_) )
+    {
+        ROS_ERROR("CupDetector cannot load param: %s/segment/distance_threshold", nh_.getNamespace().c_str() );
+    }
+
+    if ( !nh_.getParam("cluster/tolerance", cluster_tolerance_) )
+    {
+        ROS_ERROR("CupDetector cannot load param: %s/cluster/tolerance", nh_.getNamespace().c_str() );
+    }
+
+    if ( !nh_.getParam("cluster/min_cluster_size", min_cluster_size_) )
+    {
+        ROS_ERROR("CupDetector cannot load param: %s/cluster/min_cluster_size", nh_.getNamespace().c_str() );
+    }
+
+    if ( !nh_.getParam("cluster/max_cluster_size", max_cluster_size_) )
+    {
+        ROS_ERROR("CupDetector cannot load param: %s/cluster/max_cluster_size", nh_.getNamespace().c_str() );
+    }
+
+    if ( !nh_.getParam("debug/publish_table_cloud", publish_table_cloud_) )
+    {
+        ROS_ERROR("CupDetector cannot load param: %s/debug/publish_table_cloud", nh_.getNamespace().c_str() );
+    }
+
+    if ( !nh_.getParam("debug/publish_table_poly", publish_table_poly_) )
+    {
+        ROS_ERROR("CupDetector cannot load param: %s/debug/publish_table_poly", nh_.getNamespace().c_str() );
+    }
+
+    if ( !nh_.getParam("debug/publish_obj_cloud", publish_obj_cloud_) )  
+    {
+        ROS_ERROR("CupDetector cannot load param: %s/debug/publish_obj_cloud", nh_.getNamespace().c_str() );
+    }
+
+    if ( !nh_.getParam("debug/publish_cluster_cloud", publish_cluster_cloud_) )
+    {
+        ROS_ERROR("CupDetector cannot load param: %s/debug/publish_cluster_cloud", nh_.getNamespace().c_str() );
+    }
+
+    if ( !nh_.getParam("debug/publish_cup_markers", publish_cup_markers_) )
+    {
+        ROS_ERROR("CupDetector cannot load param: %s/debug/publish_cup_markers", nh_.getNamespace().c_str() );
+    }
 }
 
 void

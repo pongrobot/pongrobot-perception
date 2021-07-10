@@ -90,15 +90,50 @@ int main(int argc, char** argv)
     float loop_frq;
 
     // Read cam position from the config
-    n.getParam("/rate/tf_broadcast", loop_frq);
-    n.getParam("/frame/geometry/camera_x_offset", cam_x);
-    n.getParam("/frame/geometry/camera_z_offset", cam_z);
-    n.getParam("/frame/geometry/launcher_z_offset", launcher_z);
-    n.getParam("/frame/camera_frame_id", camera_frame_id);
-    n.getParam("/frame/world_frame_id", world_frame_id);
-    n.getParam("/frame/robot_center_frame_id", robot_center_frame_id);
-    n.getParam("/frame/robot_base_frame_id", robot_base_frame_id);
-    n.getParam("/frame/launcher_frame_id", launcher_frame_id);
+    if ( !n.getParam("/rate/tf_broadcast", loop_frq) )
+    {
+        ROS_ERROR("PongrobotTFBroadcaster cannot load param: /rate/tf_broadcast");
+    }
+
+    if ( !n.getParam("/frame/geometry/camera_x_offset", cam_x) )
+    {
+        ROS_ERROR("PongrobotTFBroadcaster cannot load param: /frame/geometry/camera_x_offset");
+    }
+
+    if ( !n.getParam("/frame/geometry/camera_z_offset", cam_z) )
+    {
+        ROS_ERROR("PongrobotTFBroadcaster cannot load param: /frame/geometry/camera_z_offset");
+    }
+    
+    if ( !n.getParam("/frame/geometry/launcher_z_offset", launcher_z) )
+    {
+        ROS_ERROR("PongrobotTFBroadcaster cannot load param: /frame/geometry/launcher_z_offset");
+    }
+
+    if ( !n.getParam("/frame/camera_frame_id", camera_frame_id) )
+    {
+        ROS_ERROR("PongrobotTFBroadcaster cannot load param: /frame/camera_frame_id");
+    }
+
+    if ( !n.getParam("/frame/world_frame_id", world_frame_id) )
+    {
+        ROS_ERROR("PongrobotTFBroadcaster cannot load param: /frame/world_frame_id");
+    }
+
+    if ( !n.getParam("/frame/robot_center_frame_id", robot_center_frame_id) )
+    {
+        ROS_ERROR("PongrobotTFBroadcaster cannot load param: /frame/robot_center_frame_id");
+    }
+
+    if ( !n.getParam("/frame/robot_base_frame_id", robot_base_frame_id) )
+    {
+        ROS_ERROR("PongrobotTFBroadcaster cannot load param: /frame/robot_base_frame_id");
+    }
+
+    if ( !n.getParam("/frame/launcher_frame_id", launcher_frame_id) )
+    {
+        ROS_ERROR("PongrobotTFBroadcaster cannot load param: /frame/launcher_frame_id");
+    } 
 
     ros::Subscriber sub = n.subscribe("imu_pose", 1000, poseCallback);
     ros::Rate loop_rate(loop_frq);
