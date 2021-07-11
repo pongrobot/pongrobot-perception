@@ -1,68 +1,99 @@
-# pongrobot_perception
-ROS package for processing camera related inputs for the brobot pong robot. Includes arduino code for reading IMU orientation from the MPU6050 and publishing into ROS.
+# pongrobot_perception 1.0.0
+ROS package for processing camera related inputs for the brobot pong robot. Includes arduino code for reading IMU orientation from the MPU6050 and publishing into ROS. This tag should be run against pongrobot_actuation 1.0.0 for best compatibility.
 
 ## Dependencies
 - rosserial
 - tf2
-- realsense2_ros
+- realsense2_ros_camera
+- realsense2_ros_description
+- librealsense2
 - pcl_ros
 ### Arduino Dependecies
 - rosserial-arduino
 - I2CDEV/MPU6050
 - VL53L0X (Pololu)
 
+### A Note on Realsense
+There are currently problems with running the current release of realsense on ARM64 distributed through apt when the camera is configured to use both rgb and stereo depth simultaneously. To resolve this, we recommend building and installing librealsense2 and realsense-ros from source and using the ROS wrapper tag [realsense-ros 2.2.24](https://github.com/IntelRealSense/realsense-ros/tree/2.2.24) and the corresponding SDK tag [librealsense v2.44.0](https://github.com/IntelRealSense/librealsense/tree/v2.44.0)
+
 ## Node Descriptions
 - `tf_broadcaster` - read DMP orientation from MPU6050 and height from VL53L0X using rosserial and broadcast all the transforms on the robot.
 - `cup_detector_node` - run the pointcloud based cup detection, takes in the point cloud published to `/camera/depth/color/points` and output a `geometry_msgs/PoseArray` containing the location of all detected cups. A variety of visualization and debugging tools are also provided. The majority of the source code is contained in the `CupDetector` object found in `src/CupDetector.cpp`.
 - `game_logic_node` - handle all the game logic for determining the state of the table, picking a target and requesting shot from the launcher. 
 
-## Published Topics
-- `/detector/surface [sensor_msgs/PointCloud2]` - optional topic that publishes a point cloud that shows the detected table surface in red
+## Topics
+- `/detector/surface [sensor_msgs/PointCloud2]`- optional topic that publishes a point cloud that shows the detected table surface in red
 - `/detector/table [geometry_msgs::PolygonStamped]` - optional topic that publishes a rectangular boundary of the detected table surface
 - `/detector/obj [sensor_msgs/PointCloud2]` - optional topic that publishes the segmented objects sitting on the detected table
 - `/detector/cluster [sensor_msgs/PointCloud2]` - optional topic that publishes the output of the euclidean clustering algorithm on the objects with a new color for each cluster 
 - `/detector/cup_marker [visualization_msgs/MarkerArray]` - optional topic that publishes a cylinder marker at located at the centroid of each detected cup
 - `/detector/cup_array [geometry_msgs/PoseArray]` - topic for the output of the cup detector, each element contains the centroid location of each detected cup ( published in robot frame)
-- `/target_cup [geometry_msgs/PoseStamped]` - the topic for the target cup to hit, (published in launcher frame)
+- `/detector/calibrate [std_msgs/EmptyMsg]` - signal to activate the calibration routine, this will send updated detector parameters to the parameter server (see pongrobot_perception#4)
+- `/detector/restart [std_msgs/EmptyMsg]` - signal to restart the cup detector. This will trigger a parameter reload, applying the new calibration to the detector
+- `/restart [std_msgs/EmptyMsg]` - signal to restart the Game manager, this will reset an persistent game state data
+- `/calibration/request [std_msgs/EmptyMsg]` - signal to request calibration from the calibration node
+- `/calibration/complete [std_msgs/EmptyMsg]` - signal from the calibration node to notify the game manager that the calibration sequence has been completed.
+- `/launcher/target_pose [geometry_msgs/PoseStamped]` - the topic for the target cup to hit, (published in launcher frame)
+- `/launcher/has_ball [std_msgs/Bool]` - signal from the launcher telling if a ball is present. Used by the Game Manager to trigger a shot
+- `/launcher/shot [geometry_msgs/PoseStamped]` - signal sent from the launcher to confirm that a shot has completed. The location of the shot is included to discriminate between commands
 
 ## Config Options
-Camera configuration options are available in `config/cam_config.yaml`. In launch files, all config options are loaded as params at `/camera/*`.
-- `camera_x_offset` - x offset from robot center origin to camera frame origin
-- `camera_Z_offset:` - Z offset from robot center origin to camera frame origin
-- `launcher_z_offset` - Z offset from robot center to launcher frame
-- `camera_frame_id` - camera frame id
-- `world_frame_id` - world frame id
-- `robot_base_frame_id` - robot base frame id
-- `robot_center_frame_id` - robot center frame id
-- `launcher_frame_id` - launcher frame id
+Node rate config options are available in `config/rate_config.yaml` and loaded under the namespace `/rate`
+detector: 10.0 # rate to run the cup detector note (hz)
+game: 10.0 # rate to run the game node at (hz)
+tf_broadcast: 20.0 # rate to run the game node at (hz)
 
-Detector specific config options are available in `config/detector.yaml`
-- `passthrough_max_depth` - the upper limit of depth for the passthrough filter on the input cloud in meters
-- `passthrough_min_depth`- the lower limit of depth for the passthrough filter on the input cloud in meters
-- `obj_max_height` - the height of the tallest object to detect on the table in meters
-- `eps_angle` - EPS angle for RANSAC plane detection in radians
-- `distance_threshold` - inlier distance threshold for RANSAC plane detection in meters 
-- `cluster_tolerance` - the euclidean clustering tolerance in meters
-- `min_cluster_size` - the min cluster size for the clustering algorithm
-- `max_cluster_size` - the max cluster size for the clustering algorithm
+Coordinate frame config options are available in `config/frame_config.yaml` and loaded under the namespace `/frame`
+- `camera_frame_id`: camera frame id
+- `world_frame_id`: world frame id
+- `robot_base_frame_id`: robot base id
+- `robot_center_frame_id`: robot center id
+- `launcher_frame_id`: launcher
+- `geometry/camera_x_offset`: X offset from robot center to camera frame
+- `geometry/camera_z_offset`: Z offset from robot center to camera frame
+- `geometry/launcher_z_offset`: Z offset from robot center to launcher frame 
 
-Debugging/visualization config options are also available in `config/detector.yaml`. They are setup to be easily disabled in an effort to preserve processing power in embedded systems.
-- `publish_table_cloud` - enable `/detector/surface`
-- `publish_table_poly` - enable `/detector/table`
-- `publish_obj_cloud` - enable `/detector/obj`
-- `publish_cluster_cloud` - enable `/detector/cluster`
-- `publish_cup_markers` - enable `/detector/cup_marker`
+Cup Detector config options are available in `config/detector_config.yaml` and loaded under the namespace `/detector`
+- `target_frame_id`: world # frame to perform vision processing in
+- `filter/passthrough_max_depth`: background clipping dist in meters
+- `filter/passthrough_min_depth`: foreground clipping dist in meters
+- `filter/object_max_height`: how far above the detected table to put the top of the box, should be greater than the cup height
+- `segment/eps_angle`: EPS angle for RANSAC plane detection in radians
+- `segment/distance_threshold`: how close a point must be to be an inlier in meters (REP 103)
+- `cluster/tolerance`: the euclidean clustering tolerance in meters
+- `cluster/min_cluster_size`: smallest allowable point cluster
+- `cluster/max_cluster_size`: largest allowable point cluster
+- `debug/publish_table_cloud`: Show the detected table in red
+- `debug/publish_table_poly`: Show the bounds of the detected table
+- `debug/publish_obj_cloud`: Show the objects on the table
+- `debug/publish_cluster_cloud`: Show the output of the clustering segmentation
+- `debug/publish_cup_markers`: Show the detected cups as cylinder markers
+
+Game Manager config options are available in `config/game_config.yaml` and loaded under the namespace `/game`
+`calibration_timeout`: The max amount of time the game node will wait for calibration to complete (sec)
+`launcher_timeout`: The max amount of time the game node will wait for launcher confirmation before assuming failure (sec)
+`cup_height`: The height of the cup, used to calculate the z component of the target (will be removed in a future version)
+
 
 ## Provided Launchfiles
-Launchfiles can be found under `/launch` and coordinate running the required nodes and rviz configurations
+Launchfiles can be found under `/launch` and coordinate running the required nodes and rviz configurations. Headless variations of many launchfiles are provided, the only difference is these do not run rviz.
 - `pongrobot_tf.launch` - generate all the robot transforms anf visualize them in rviz
 - `cup_detector.launch` - main node to launch the camera, cup detector and a visualization of the detected cups. If enabled, the additional visualization/debugging data is already configured in rviz although some may be hidden initially.
-- `cup_detector.launch` - the same  as `cup_detector` without the visualization. Intended to run on the Raspberry Pi running without a display
+- `perception.launch` - launch all the nodes under the perception package including the GameManager, TF broadcaster and the CupDetector
+  
+## Utilities
+Some useful utilities are provided under `/utils`, these are used for setting up system services, remote connections and udev rules.
+
+### Udev Rules
+Before the package can be run, the appropriate udev rules must be setup. This will allow the system to correctly identify USB devices. To setup the rule for the transform node, run `sudo cp 11-brobot-tf.rules /etc/udev/rules.d`. *NOTE:* Udev rules for the realsense are not included as they should be installed with the library.
+
+### Setup Remote Environment
+The system is setup so the robot will normally run without rendering the visualization but it will stream all the necessary data to do so on a remote machine. If ROS is properly configured on another computer on the same network, all the visualization and debugging tools such as rviz can connect to the robot. In order to speed up this process, a shell script has been provided to quickly set the necessary environment variables for remove visualization. To enable remove monitoring, run `source utils/setupRemoteEnv.sh` from the package root.
 
 ### Running as a Background Service
 The launch files can be installed as a system service, to run in the background on startup. This is managed using the [robot_upstart](http://wiki.ros.org/robot_upstart) package. 
 
-The `/launch/scripts/` folder contains several scripts to manage this process:
+The `/utils/service/` folder contains several scripts to manage this process:
 - `install_service.sh` uses `robot_upstart` to install a system service that will run `pongrobot_headless.launch`.
 - `start_service.sh` starts the system service. This setting persists across restarts.
 - `stop_service.sh` stops the system service. This setting persists across restarts. Run this command before you manually run any launch files, to prevent the background service conflicting.
@@ -82,14 +113,14 @@ Here is a high level overview of the point cloud processing pipeline used to det
 - World Frame: the origin is on the ground at the base of the center of the robot, Z is normal to the ground
 - Robot Base Frame: The same origin as World Frame with pitch and roll attitude of the robot calculated from the IMU. __NOTE: yaw component is removed from the transform__
 - Robot Center Frame: the same attitude as Robot Base frame but the origin is translated up in Z to align with the base of the robots aluminum frame
-- - Launcher Frame: reference frame centered at the center of the launcher. Z offset from Robot Center is defined in the config
+- Launcher Frame: reference frame centered at the center of the launcher. Z offset from Robot Center is defined in the config
 - Camera Frame: reference frame of the camera, transform to Robot Center frame determined from config and IMU data
 - Image Frame: image reference with z depth
   
-| MPU     | ATMega32U4 | VL53L0X |
-| --------| -----------| ------- |
-| VCC <---|--> VCC <-- | ---> VCC|
-| GND <-- |--> GND <-- | ---> GND|
-| SCL <-- |-->  3  <-- | ---> SCL|
-| SDA <-- |-->  2  <-- | ---> SDA|
-| INT <-- |-->  7      | NC      |
+| MPU      | ATMega32U4  | VL53L0X  |
+| -------- | ----------- | -------- |
+| VCC <--- | --> VCC <-- | ---> VCC |
+| GND <--  | --> GND <-- | ---> GND |
+| SCL <--  | -->  3  <-- | ---> SCL |
+| SDA <--  | -->  2  <-- | ---> SDA |
+| INT <--  | -->  7      | NC       |
