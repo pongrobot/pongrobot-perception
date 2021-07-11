@@ -39,9 +39,9 @@ There are currently problems with running the current release of realsense on AR
 
 ## Config Options
 Node rate config options are available in `config/rate_config.yaml` and loaded under the namespace `/rate`
-detector: 10.0 # rate to run the cup detector note (hz)
-game: 10.0 # rate to run the game node at (hz)
-tf_broadcast: 20.0 # rate to run the game node at (hz)
+-`detector`: 10.0 # rate to run the cup detector note (hz)
+-`game`: 10.0 # rate to run the game node at (hz)
+-`tf_broadcast`: 20.0 # rate to run the game node at (hz)
 
 Coordinate frame config options are available in `config/frame_config.yaml` and loaded under the namespace `/frame`
 - `camera_frame_id`: camera frame id
@@ -70,10 +70,9 @@ Cup Detector config options are available in `config/detector_config.yaml` and l
 - `debug/publish_cup_markers`: Show the detected cups as cylinder markers
 
 Game Manager config options are available in `config/game_config.yaml` and loaded under the namespace `/game`
-`calibration_timeout`: The max amount of time the game node will wait for calibration to complete (sec)
-`launcher_timeout`: The max amount of time the game node will wait for launcher confirmation before assuming failure (sec)
-`cup_height`: The height of the cup, used to calculate the z component of the target (will be removed in a future version)
-
+- `calibration_timeout`: The max amount of time the game node will wait for calibration to complete (sec)
+- `launcher_timeout`: The max amount of time the game node will wait for launcher confirmation before assuming failure (sec)
+- `cup_height`: The height of the cup, used to calculate the z component of the target (will be removed in a future version)
 
 ## Provided Launchfiles
 Launchfiles can be found under `/launch` and coordinate running the required nodes and rviz configurations. Headless variations of many launchfiles are provided, the only difference is these do not run rviz.
