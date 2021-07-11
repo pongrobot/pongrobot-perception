@@ -43,6 +43,12 @@
         <node name="cup_detector_node" pkg="pongrobot_perception" type="cup_detector_node" output="screen" />
     </group>
 
+    <group ns="rosbridge">
+        <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" >
+            <arg name="port" value="8081"/>
+        </include>
+    </group>
+
     <include file="$(find pongrobot_actuation)/launch/launcher_headless.launch" />
 
 </launch>
