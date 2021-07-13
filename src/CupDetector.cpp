@@ -2,15 +2,22 @@
 
 CupDetector::
 CupDetector( ros::NodeHandle nh ):
-    tf_listener_(tf_buffer_)
+    tf_listener_(tf_buffer_),
+    restart_(false),
+    calibrate_(false),
+    state_(DetectorState::RUNNING) // Set to CALIBRATING once the calibration node is setup
 {
     nh_ = nh;
+    calibration_time_ = ros::Time::now();
 
     // Read in detector parameters
     load_params();        
 
     // Init Publishers and Subscribers
     cloud_sub_ = nh_.subscribe<pcl::PointCloud<pcl::PointXYZRGB>> ("/camera/depth/color/points", 1, &CupDetector::pointCloudCallback, this);
+    restart_sub_ = nh_.subscribe<std_msgs::Empty> ("/detector/restart", 1, &CupDetector::restartCallback, this);
+    calibrate_sub_ = nh_.subscribe<std_msgs::Empty> ("/detector/calibrate", 1, &CupDetector::calibrateCallback, this);
+    state_pub_ = nh.advertise<std_msgs::Int8>( "/detector/state", 1 );
     if ( publish_table_cloud_ ) { surface_cloud_pub_ = nh.advertise<sensor_msgs::PointCloud2> ("/detector/surface", 1); }
     if ( publish_obj_cloud_ ) { obj_cloud_pub_ = nh.advertise<sensor_msgs::PointCloud2> ("/detector/obj", 1); }
     if ( publish_table_poly_ ) { table_poly_pub_ = nh.advertise<geometry_msgs::PolygonStamped> ("/detector/table", 1); }
@@ -54,6 +61,20 @@ pointCloudCallback( const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& msg )
     {
         ROS_WARN("%s",ex.what());
     } 
+}
+
+void
+CupDetector::
+restartCallback(const std_msgs::Empty::ConstPtr& msg)
+{
+    restart_ = true;
+}
+
+void 
+CupDetector::
+calibrateCallback(const std_msgs::Empty::ConstPtr& msg)
+{
+    calibrate_ = true;
 }
 
 void
@@ -129,11 +150,85 @@ load_params()
     {
         ROS_ERROR("CupDetector cannot load param: %s/debug/publish_cup_markers", nh_.getNamespace().c_str() );
     }
+
+    double calibration_timeout_val;
+    if ( !nh_.getParam("/game/calibration_timeout", calibration_timeout_val) )
+    {
+        calibration_timeout_val = 60.0; // Set default value
+        ROS_WARN("CupDetector cannot load param: /game/calibration_timout. Using default value of 30sec");
+    }
+    calibration_timeout_ = ros::Duration(calibration_timeout_val+30);
 }
 
 void
 CupDetector::
 run()
+{
+    switch(state_)
+    {
+        case DetectorState::CALIBRATING:
+        {
+
+            // Check for restart
+            if ( restart_ )
+            {
+                state_ = DetectorState::RESTARTING;
+                ROS_INFO("[CupDetector] RUNNING->RESTARTING: Received restart request");
+                restart_ = false;
+            }
+
+            // Check for timeout
+            if ( ros::Time::now() - calibration_time_ > calibration_timeout_ )
+            {
+                state_ = DetectorState::RESTARTING;
+                ROS_INFO("[CupDetector] RUNNING->RESTARTING: Calibration timeout");
+            }
+
+            break;
+        }
+        case DetectorState::RESTARTING:
+        {
+            
+            // Reload new parameters from the server
+            load_params();
+
+            state_ = DetectorState::RUNNING;
+            ROS_INFO("[CupDetector] RESTARTING->RUNNING: Reloading parameters");
+            break;
+        }
+        case DetectorState::RUNNING:
+        {
+            if ( calibrate_ )
+            {
+                state_ = DetectorState::CALIBRATING;
+                calibration_time_ = ros::Time::now();
+                ROS_INFO("[CupDetector] RUNNING->CALIBRATING: Received calibrate request");
+                calibrate_ = false;
+                restart_ = false;
+            }
+
+            if ( restart_ )
+            {
+                state_ = DetectorState::RESTARTING;
+                ROS_INFO("[CupDetector] RUNNING->RESTARTING: Received restart request");
+                restart_ = false;
+            }
+
+            // Actually run the detection
+            detect();
+
+            break;
+        }
+    }
+
+    std_msgs::Int8 state_msg;
+    state_msg.data = state_;
+    state_pub_.publish(state_msg);
+}
+
+void
+CupDetector::
+detect()
 {
     if ( !cloud_->empty() )
     {
@@ -298,6 +393,7 @@ run()
         }
     }
 }
+
 
 geometry_msgs::PolygonStamped
 CupDetector::

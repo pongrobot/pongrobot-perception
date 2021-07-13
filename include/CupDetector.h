@@ -6,6 +6,7 @@
 #include <tf2_ros/transform_listener.h>
 #include <geometry_msgs/PolygonStamped.h>
 #include <geometry_msgs/PoseArray.h>
+#include <std_msgs/Int8.h>
 #include <visualization_msgs/MarkerArray.h>
 
 // PCL headers
@@ -24,11 +25,19 @@
 #include <pcl/ModelCoefficients.h>
 #include <pcl/search/kdtree.h>
 
+enum DetectorState
+{
+    CALIBRATING,
+    RESTARTING,
+    RUNNING
+};
+
 class CupDetector
 {
     public:
         CupDetector( ros::NodeHandle nh );
         void run();
+        void detect();
         void load_params();
 
     private:
@@ -41,6 +50,16 @@ class CupDetector
         ros::Publisher table_poly_pub_; 
         ros::Publisher marker_pub_;
         ros::Publisher cup_pose_pub_;
+        ros::Publisher state_pub_;
+        ros::Subscriber restart_sub_;
+        ros::Subscriber calibrate_sub_;
+
+        // Control Data
+        DetectorState state_;
+        bool restart_;
+        bool calibrate_;
+        ros::Time calibration_time_;
+        ros::Duration calibration_timeout_;
 
         // Filter/Segmentation params
         double passthrough_max_depth_;
@@ -72,8 +91,10 @@ class CupDetector
         bool publish_cluster_cloud_;
         bool publish_cup_markers_;
 
-        // Callback
+        // Callbacks
         void pointCloudCallback(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& msg);
+        void restartCallback(const std_msgs::Empty::ConstPtr& msg);
+        void calibrateCallback(const std_msgs::Empty::ConstPtr& msg);
 
         // Helpers
         geometry_msgs::PolygonStamped buildTablePoly( pcl::PointXYZRGB minPt, pcl::PointXYZRGB maxPt );

@@ -3,6 +3,9 @@
     <arg name="json_file_path"        default=""/>
     <arg name="camera"                default="camera"/>
 
+    <rosparam file="$(find pongrobot_perception)/config/rate_config.yaml" ns="rate" />
+    <rosparam file="$(find pongrobot_perception)/config/frame_config.yaml" ns="frame" />
+
     <group ns="$(arg camera)">
         <include file="$(find realsense2_camera)/launch/includes/nodelet.launch.xml">
             <arg name="serial_no"         value="$(arg serial_no)"/>
@@ -27,11 +30,8 @@
 
         <node name="tf_broadcaster" pkg="pongrobot_perception" type="tf_broadcaster" />
         <node name="serial" pkg="rosserial_python" type="serial_node.py" args="/dev/brobot_tf" />
-        <node type="rviz" name="rviz" pkg="rviz" args="-d $(find pongrobot_perception)/rviz/pongrobot.rviz" />
     </group>
     
-    <rosparam file="$(find pongrobot_perception)/config/rate_config.yaml" ns="rate" />
-    <rosparam file="$(find pongrobot_perception)/config/frame_config.yaml" ns="frame" />
 
     <group ns="game">
         <rosparam file="$(find pongrobot_perception)/config/game_config.yaml" />
@@ -50,6 +50,8 @@
     </group>
 
     <include file="$(find pongrobot_actuation)/launch/launcher_headless.launch" />
+
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find pongrobot_perception)/rviz/pongrobot.rviz" />
 
 </launch>
 

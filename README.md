@@ -39,9 +39,9 @@ There are currently problems with running the current release of realsense on AR
 
 ## Config Options
 Node rate config options are available in `config/rate_config.yaml` and loaded under the namespace `/rate`
--`detector`: 10.0 # rate to run the cup detector note (hz)
--`game`: 10.0 # rate to run the game node at (hz)
--`tf_broadcast`: 20.0 # rate to run the game node at (hz)
+- `detector`: 10.0 # rate to run the cup detector note (hz)
+- `game`: 10.0 # rate to run the game node at (hz)
+- `tf_broadcast`: 20.0 # rate to run the game node at (hz)
 
 Coordinate frame config options are available in `config/frame_config.yaml` and loaded under the namespace `/frame`
 - `camera_frame_id`: camera frame id
