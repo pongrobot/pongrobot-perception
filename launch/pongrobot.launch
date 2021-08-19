@@ -10,12 +10,12 @@
         <include file="$(find realsense2_camera)/launch/includes/nodelet.launch.xml">
             <arg name="serial_no"         value="$(arg serial_no)"/>
             <arg name="json_file_path"    value="$(arg json_file_path)"/>
-            <arg name="depth_width"       value="640"/>
-            <arg name="depth_height"      value="480"/>
-            <arg name="depth_fps"         value="10"/>
-            <arg name="color_width"       value="640"/>
-            <arg name="color_height"      value="480"/>
-            <arg name="color_fps"         value="10"/>
+            <arg name="depth_width"       value="424"/>
+            <arg name="depth_height"      value="240"/>
+            <arg name="depth_fps"         value="6"/>
+            <arg name="color_width"       value="424"/>
+            <arg name="color_height"      value="240"/>
+            <arg name="color_fps"         value="6"/>
             <arg name="enable_depth"      value="true"/>
             <arg name="enable_color"      value="true"/>
             <arg name="enable_infra1"     value="false"/>
@@ -43,15 +43,8 @@
         <node name="cup_detector_node" pkg="pongrobot_perception" type="cup_detector_node" output="screen" />
     </group>
 
-    <group ns="rosbridge">
-        <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" >
-            <arg name="port" value="8081"/>
-        </include>
-    </group>
-
     <include file="$(find pongrobot_actuation)/launch/launcher_headless.launch" />
 
     <node type="rviz" name="rviz" pkg="rviz" args="-d $(find pongrobot_perception)/rviz/pongrobot.rviz" />
-
 </launch>
 
