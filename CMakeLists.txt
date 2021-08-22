@@ -26,6 +26,16 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(Simple-WebSocket-Server)
 
+FetchContent_Declare(json
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG v3.9.1)
+
+FetchContent_GetProperties(json)
+if(NOT json_POPULATED)
+    FetchContent_Populate(json)
+    add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -63,6 +73,7 @@ target_link_libraries( cup_detector_node ${catkin_LIBRARIES} )
 add_executable( game_logic_node src/game_logic_node.cpp src/GameManager.cpp )
 target_link_libraries( game_logic_node ${catkin_LIBRARIES} )
 
-add_executable( socket_telemetry_node src/socket_telemetry_node.cpp src/SocketTelemetryNode.cpp )
+add_executable( socket_telemetry_node src/socket_telemetry_node.cpp src/SocketTelemetryNode.cpp src/messagepack.cpp )
 target_link_libraries( socket_telemetry_node ${catkin_LIBRARIES} )
 target_link_libraries( socket_telemetry_node simple-websocket-server)
+target_link_libraries( socket_telemetry_node nlohmann_json::nlohmann_json)

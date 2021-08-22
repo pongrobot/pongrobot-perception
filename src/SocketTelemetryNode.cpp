@@ -6,20 +6,30 @@ SocketTelemetryNode::SocketTelemetryNode( ros::NodeHandle nh )
 
     server.config.port = 8080;
 
-    auto &echo = server.endpoint["^/data/?$"];
+    auto &endpoint = server.endpoint["^/data/?$"];
 
-    echo.on_open = [](std::shared_ptr<WsServer::Connection> connection) {
+    endpoint.on_open = [](std::shared_ptr<WsServer::Connection> connection) {
         std::cout << "Server: Opened connection " << connection.get() << std::endl;
     };
 
-    echo.on_close = [](std::shared_ptr<WsServer::Connection> connection, int status, const std::string &reason) {
+    endpoint.on_close = [](std::shared_ptr<WsServer::Connection> connection, int status, const std::string &reason) {
         std::cout << "Server: Closed connection " << connection.get() << " with status code " << status << std::endl;
     };
 
-    echo.on_error = [](std::shared_ptr<WsServer::Connection> connection, const SimpleWeb::error_code &ec) {
+    endpoint.on_error = [](std::shared_ptr<WsServer::Connection> connection, const SimpleWeb::error_code &ec) {
         std::cout << "Server: Error in connection " << connection.get() << ". "
             << "Error: " << ec << ", error message: " << ec.message() << std::endl;
     };
+
+    endpoint.on_message = [&](std::shared_ptr<WsServer::Connection> connection, std::shared_ptr<WsServer::InMessage> message) {
+        // Parse JSON command message
+        auto jsonMsg = json::parse(message->string());
+        handleCommand(jsonMsg);
+    };
+}
+
+void SocketTelemetryNode::handleCommand(json& jsonMsg) {
+    std::cout << jsonMsg.dump(4) << std::endl;
 }
 
 void SocketTelemetryNode::start()

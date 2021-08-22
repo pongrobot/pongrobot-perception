@@ -12,11 +12,31 @@
 #include <std_msgs/Empty.h>
 
 // WebSocket headers
+#include "client_ws.hpp"
 #include "server_ws.hpp"
 #include <future>
 #include <memory>
 
+// MessagePack and JSON
+#include "messagepack.h"
+#include <nlohmann/json.hpp>
+
 using WsServer = SimpleWeb::SocketServer<SimpleWeb::WS>;
+using WsClient = SimpleWeb::SocketClient<SimpleWeb::WS>;
+
+using json = nlohmann::json;
+
+// Command types coming in from the UI
+enum SocketCommandType {
+    COMMAND,
+    PARAMETER
+};
+
+enum SocketTelemetry {
+    TELEMETRY,
+    PARAMETERS,
+    POINT_CLOUD
+};
 
 class SocketTelemetryNode
 {
@@ -25,6 +45,7 @@ class SocketTelemetryNode
         void start();
         void update();
         void stop();
+        void handleCommand(json& jsonMsg);
 
     private:
         // Ros data
