@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.16)
+
 project(pongrobot_perception)
 
 ## Find catkin macros and libraries
@@ -15,6 +16,15 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(OpenCV REQUIRED)
+
+include(FetchContent)
+include(ExternalProject)
+
+FetchContent_Declare(
+        Simple-WebSocket-Server
+        GIT_REPOSITORY https://gitlab.com/eidheim/Simple-WebSocket-Server.git
+)
+FetchContent_MakeAvailable(Simple-WebSocket-Server)
 
 ###################################
 ## catkin specific configuration ##
@@ -52,3 +62,7 @@ target_link_libraries( cup_detector_node ${catkin_LIBRARIES} )
 
 add_executable( game_logic_node src/game_logic_node.cpp src/GameManager.cpp )
 target_link_libraries( game_logic_node ${catkin_LIBRARIES} )
+
+add_executable( socket_telemetry_node src/socket_telemetry_node.cpp src/SocketTelemetryNode.cpp )
+target_link_libraries( socket_telemetry_node ${catkin_LIBRARIES} )
+target_link_libraries( socket_telemetry_node simple-websocket-server)
