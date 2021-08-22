@@ -26,10 +26,46 @@ SocketTelemetryNode::SocketTelemetryNode( ros::NodeHandle nh )
         auto jsonMsg = json::parse(message->string());
         handleCommand(jsonMsg);
     };
+
+    trigger_pub_ = nh.advertise<std_msgs::Empty> ("/launcher/trigger", 1);
+    rpm_cmd_pub_ = nh.advertise<std_msgs::Float32>( "/launcher/rpm_cmd", 1 );
+    zero_gimbal_pub_ = nh.advertise<std_msgs::Empty> ("/launcher/reset", 1);
 }
 
 void SocketTelemetryNode::handleCommand(json& jsonMsg) {
-    std::cout << jsonMsg.dump(4) << std::endl;
+    int type = jsonMsg["type"];
+    std::string key = jsonMsg["key"];
+
+    if (type == 0) {
+        std::cout << "Got command '" << key << "'..." << std::endl;
+
+        // Handle commands
+        if (key == "shutdown_rpi") {
+
+        }
+        if (key == "restart_rpi") {
+
+        }
+        if (key == "zero_yaw_gimbal") {
+            std_msgs::Empty request;
+            zero_gimbal_pub_.publish(request);
+        }
+        if (key == "launch_ball") {
+            std_msgs::Empty request;
+            trigger_pub_.publish(request);
+        }
+        if (key == "spin_up_motors") {
+            std_msgs::Float32 request;
+            request.data = 1000.0f;
+            rpm_cmd_pub_.publish(request);
+        }
+    } else if (type == 1) {
+        std::cout << "Got parameter update,key: '" << key << "', value: " << std::endl;
+
+    }
+
+
+
 }
 
 void SocketTelemetryNode::start()

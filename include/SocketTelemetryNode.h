@@ -10,6 +10,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Empty.h>
+#include <std_msgs/Float32.h>
 
 // WebSocket headers
 #include "client_ws.hpp"
@@ -50,6 +51,9 @@ class SocketTelemetryNode
     private:
         // Ros data
         ros::NodeHandle nh_;
+        ros::Publisher trigger_pub_;
+        ros::Publisher rpm_cmd_pub_;
+        ros::Publisher zero_gimbal_pub_;
 
         // WebSocket server
         WsServer server;
