@@ -1,3 +1,3 @@
 calibration_timeout: 30.0 # The max amount of time the game node will wait for calibration to complete (sec)
 launcher_timeout: 20.0 # The max amount of time the game node will wait for launcher confimation before assuming failure (sec)
-cup_height: 0.1 # TODO: remove this and calculate the cup height
+cup_height: 0.15 # TODO: remove this and calculate the cup height
