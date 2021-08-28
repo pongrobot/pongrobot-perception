@@ -1,7 +1,7 @@
 target_frame_id: world # frame to perform vision processing in
 
 # Initial filter paramters
-filter/passthrough_max_depth: 1.7 # background clipping dist in meters
+filter/passthrough_max_depth: 1.85 # background clipping dist in meters
 filter/passthrough_min_depth: 0.0 # foreground clipping dist in meters
 filter/object_max_height: 0.2 # how far above the detected table to put the top of the box, should be greater than the cup height
 
