@@ -37,6 +37,10 @@
         <node name="game_logic_node" pkg="pongrobot_perception" type="game_logic_node" output="screen" />
     </group>
 
+    <group ns="socket">
+        <node name="socket_telemetry_node" pkg="pongrobot_perception" type="socket_telemetry_node" output="screen" />
+    </group>
+
     <group ns="detector">
         <rosparam file="$(find pongrobot_perception)/config/detector_config.yaml" />
         <node name="cup_detector_node" pkg="pongrobot_perception" type="cup_detector_node" output="screen" />
