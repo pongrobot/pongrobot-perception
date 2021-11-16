@@ -40,11 +40,14 @@ void SocketTelemetryNode::handleCommand(json& jsonMsg) {
         std::cout << "Got command '" << key << "'..." << std::endl;
 
         // Handle commands
-        if (key == "shutdown_rpi") {
-
+        if (key == "shutdown") {
+            system("shutdown now");
         }
-        if (key == "restart_rpi") {
-
+        if (key == "restart") {
+            system("shutdown -r now");
+        }
+        if (key == "restart_ros") {
+            system("systemctl restart pongrobot.service");
         }
         if (key == "zero_yaw_gimbal") {
             std_msgs::Empty request;
@@ -61,11 +64,7 @@ void SocketTelemetryNode::handleCommand(json& jsonMsg) {
         }
     } else if (type == 1) {
         std::cout << "Got parameter update,key: '" << key << "', value: " << std::endl;
-
     }
-
-
-
 }
 
 void SocketTelemetryNode::start()
@@ -83,6 +82,8 @@ void SocketTelemetryNode::start()
 
 void SocketTelemetryNode::update()
 {
+    // If we have updates to any of the data, send a message over the websocket
+
 }
 
 void SocketTelemetryNode::stop()
