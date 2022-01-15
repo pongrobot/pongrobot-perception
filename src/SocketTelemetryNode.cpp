@@ -41,10 +41,10 @@ void SocketTelemetryNode::handleCommand(json& jsonMsg) {
 
         // Handle commands
         if (key == "shutdown") {
-            system("shutdown now");
+            system("sudo shutdown now");
         }
         if (key == "restart") {
-            system("shutdown -r now");
+            system("sudo shutdown -r now");
         }
         if (key == "restart_ros") {
             system("systemctl restart pongrobot.service");

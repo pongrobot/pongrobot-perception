@@ -43,7 +43,7 @@
     </group>
 
     <group ns="socket">
-        <node name="socket_telemetry_node" pkg="pongrobot_perception" type="socket_telemetry_node" output="screen" />
+        <node name="socket_telemetry_node" pkg="pongrobot_perception" type="socket_telemetry_node" output="screen" launch-prefix="sudo -E" />
     </group>
 
     <include file="$(find pongrobot_actuation)/launch/launcher_headless.launch" />
