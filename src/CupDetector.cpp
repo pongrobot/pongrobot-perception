@@ -18,9 +18,7 @@ CupDetector( ros::NodeHandle nh ):
     restart_sub_ = nh_.subscribe<std_msgs::Empty> ("/detector/restart", 1, &CupDetector::restartCallback, this);
     calibrate_sub_ = nh_.subscribe<std_msgs::Empty> ("/detector/calibrate", 1, &CupDetector::calibrateCallback, this);
     state_pub_ = nh.advertise<std_msgs::Int8>( "/detector/state", 1 );
-    if ( publish_table_cloud_ ) { surface_cloud_pub_ = nh.advertise<sensor_msgs::PointCloud2> ("/detector/surface", 1); }
     if ( publish_obj_cloud_ ) { obj_cloud_pub_ = nh.advertise<sensor_msgs::PointCloud2> ("/detector/obj", 1); }
-    if ( publish_table_poly_ ) { table_poly_pub_ = nh.advertise<geometry_msgs::PolygonStamped> ("/detector/table", 1); }
     if ( publish_cluster_cloud_ ) { cluster_cloud_pub_ = nh.advertise<sensor_msgs::PointCloud2> ("/detector/cluster", 1); }
     if ( publish_cup_markers_ ) { marker_pub_ = nh.advertise<visualization_msgs::MarkerArray>( "/detector/cup_marker", 1 ); };
     cup_pose_pub_ = nh.advertise<geometry_msgs::PoseArray>( "/detector/cup_array", 1 );
@@ -275,7 +273,6 @@ detect()
                         marked_cloud_->points[idx].b = 0x00;
                     }
 
-                    surface_cloud_pub_.publish(marked_cloud_);
                 }
 
                 // Extract inliers from cloud
@@ -292,7 +289,6 @@ detect()
                 if ( publish_table_poly_ )
                 {
                     geometry_msgs::PolygonStamped table_poly = buildTablePoly( minPt, maxPt );
-                    table_poly_pub_.publish(table_poly);
                 }
 
                 // Pull out segmented objects on table

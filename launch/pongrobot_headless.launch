@@ -44,6 +44,7 @@
     <group ns="detector">
         <rosparam file="$(find pongrobot_perception)/config/detector_config.yaml" />
         <node name="cup_detector_node" pkg="pongrobot_perception" type="cup_detector_node" output="screen" />
+        <node name="calibrator_node" pkg="pongrobot_perception" type="calibrator_node" output="screen" />
     </group>
 
     <include file="$(find pongrobot_actuation)/launch/launcher_headless.launch" />

@@ -44,10 +44,8 @@ class CupDetector
         // Ros data
         ros::NodeHandle nh_;
         ros::Subscriber cloud_sub_;
-        ros::Publisher surface_cloud_pub_;
         ros::Publisher obj_cloud_pub_;
         ros::Publisher cluster_cloud_pub_;
-        ros::Publisher table_poly_pub_; 
         ros::Publisher marker_pub_;
         ros::Publisher cup_pose_pub_;
         ros::Publisher state_pub_;
