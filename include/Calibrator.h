@@ -53,6 +53,11 @@ class Calibrator
         bool publish_table_cloud_;
         bool publish_table_poly_;
 
+        // Calibration
+        bool run_calibration_;
+        int num_iterations_;
+        std::vector<pcl::PointXYZRGB> calibration_;
+
         // Point clouds
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_;
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr passthrough_cloud_;
@@ -64,6 +69,8 @@ class Calibrator
 
         // Helpers
         geometry_msgs::PolygonStamped buildTablePoly( pcl::PointXYZRGB minPt, pcl::PointXYZRGB maxPt);
+        std::vector<pcl::PointXYZRGB> calibrate();
+        void publishCalibration();
 };
 
 #endif

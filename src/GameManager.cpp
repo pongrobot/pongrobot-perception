@@ -8,7 +8,7 @@ GameManager( ros::NodeHandle nh ):
     shot_success_(false),
     calibration_request_(false),
     restart_request_(false),
-    state_(GameState::IDLE) //TODO: Initialize to calibrating when setup
+    state_(GameState::IDLE) 
 {
     nh_ = nh;
     

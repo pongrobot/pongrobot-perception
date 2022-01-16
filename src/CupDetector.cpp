@@ -5,7 +5,7 @@ CupDetector( ros::NodeHandle nh ):
     tf_listener_(tf_buffer_),
     restart_(false),
     calibrate_(false),
-    state_(DetectorState::RUNNING) // Set to CALIBRATING once the calibration node is setup
+    state_(DetectorState::RUNNING) 
 {
     nh_ = nh;
     calibration_time_ = ros::Time::now();

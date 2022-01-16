@@ -2,7 +2,8 @@
 
 Calibrator::
 Calibrator( ros::NodeHandle nh ):
-    tf_listener_(tf_buffer_)
+    tf_listener_(tf_buffer_),
+    run_calibration_(false)
 {
     nh_ = nh;
     // Read in calibrator parameters
@@ -27,6 +28,28 @@ void
 Calibrator::
 run()
 {
+  if (run_calibration_)
+  {
+      loadParams();
+      calibration_ = calibrate();
+
+      if (calibration_.size() > 0)
+      {
+          run_calibration_ = false;
+          ROS_INFO ("Calibration Successful"); 
+          
+          // Send updated calibration to parameter server          
+          publishCalibration();
+
+          // Send completion signal
+          std_msgs::Empty completed;
+          calibrate_complete_pub_.publish(completed);
+      }
+      else
+      {
+          ROS_ERROR ("Calibration failed: Could not estimate a planar model for the given dataset.");
+      }
+  }
 
 }
 
@@ -34,83 +57,7 @@ void
 Calibrator::
 calibrateCallback(const std_msgs::Empty::ConstPtr& msg)
 {
-    bool success = false;
-
-    if ( !cloud_->empty() )
-    {
-        // Passthrough filter
-        pcl::PassThrough<pcl::PointXYZRGB> pass;
-        pass.setInputCloud(cloud_);
-        pass.setFilterFieldName("x");
-        pass.setFilterLimits(passthrough_min_depth_, passthrough_max_depth_);
-        pass.filter(*passthrough_cloud_);
-
-        if ( !passthrough_cloud_->empty() )
-        {
-            // Plane detection
-            pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
-            pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
-
-            // Create the segmentation object
-            pcl::SACSegmentation<pcl::PointXYZRGB> seg;
-            seg.setOptimizeCoefficients(true);
-            seg.setModelType(pcl::SACMODEL_PARALLEL_PLANE);
-            seg.setAxis(Eigen::Vector3f::UnitX());
-            seg.setEpsAngle(eps_angle_);
-            seg.setMethodType(pcl::SAC_RANSAC);
-            seg.setDistanceThreshold(distance_threshold_);
-            seg.setInputCloud(passthrough_cloud_);
-            seg.segment (*inliers, *coefficients);             
-
-            // Make sure a plane was found
-            if (inliers->indices.size() != 0)
-            {
-                if ( publish_table_cloud_ )
-                {
-                    // Set points on plane to red for debugging
-                    marked_cloud_ = passthrough_cloud_->makeShared();                
-
-                    for (const auto& idx: inliers->indices)
-                    {
-                        marked_cloud_->points[idx].r = 0xFF;
-                        marked_cloud_->points[idx].g = 0x00;
-                        marked_cloud_->points[idx].b = 0x00;
-                    }
-
-                    surface_cloud_pub_.publish(marked_cloud_);
-                }
-
-                // Extract inliers from cloud
-                pcl::PointCloud<pcl::PointXYZRGB>::Ptr surface_cloud_(new pcl::PointCloud<pcl::PointXYZRGB>());
-                pcl::ExtractIndices<pcl::PointXYZRGB> extract;
-                extract.setInputCloud(passthrough_cloud_);
-                extract.setIndices(inliers);
-                extract.setNegative(false);
-                extract.filter (*surface_cloud_);
-                pcl::PointXYZRGB minPt, maxPt;
-                pcl::getMinMax3D (*surface_cloud_, minPt, maxPt);
-
-                // Build table polygon
-                geometry_msgs::PolygonStamped table_poly = buildTablePoly( minPt, maxPt );
-                table_poly_pub_.publish(table_poly);
-                success = true;
-
-            }
-        }
-
-        if ( success )
-        {
-            ROS_INFO ("Calibration Successful"); 
-        }
-        else
-        {
-            ROS_ERROR ("Calibration failed: Could not estimate a planar model for the given dataset.");
-        }
-
-
-        std_msgs::Empty completed;
-        calibrate_complete_pub_.publish(completed);
-    }
+    run_calibration_ = true;
 }
 
 void
@@ -174,6 +121,35 @@ loadParams()
     }
 }
 
+void
+Calibrator::
+publishCalibration()
+{
+    if (calibration_.size() == 2)
+    {
+        std::vector<float> min;
+        min.push_back(calibration_[0].x);
+        min.push_back(calibration_[0].y);
+        min.push_back(calibration_[0].z);
+        nh_.setParam("calibration/table_plane/min", min);
+
+        std::vector<float> max;
+        max.push_back(calibration_[1].x);
+        max.push_back(calibration_[1].y);
+        max.push_back(calibration_[1].z);
+        nh_.setParam("calibration/table_plane/max", max);
+    }
+    else
+    {
+        std::vector<float> min{0,0,0};
+        nh_.setParam("calibration/table_plane/min", min);
+
+        std::vector<float> max{0,0,0};
+        nh_.setParam("calibration/table_plane/max", max);
+  
+    }
+}
+
 geometry_msgs::PolygonStamped
 Calibrator::
 buildTablePoly( pcl::PointXYZRGB minPt, pcl::PointXYZRGB maxPt )
@@ -207,3 +183,80 @@ buildTablePoly( pcl::PointXYZRGB minPt, pcl::PointXYZRGB maxPt )
 
     return table_poly;
 }
+
+std::vector<pcl::PointXYZRGB>
+Calibrator::
+calibrate()
+{
+    // Store calibration
+    std::vector<pcl::PointXYZRGB> min_max;
+
+    if ( !cloud_->empty() )
+    {
+        // Passthrough filter
+        pcl::PassThrough<pcl::PointXYZRGB> pass;
+        pass.setInputCloud(cloud_);
+        pass.setFilterFieldName("x");
+        pass.setFilterLimits(passthrough_min_depth_, passthrough_max_depth_);
+        pass.filter(*passthrough_cloud_);
+
+        if ( !passthrough_cloud_->empty() )
+        {
+            // Plane detection
+            pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
+            pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+
+            // Create the segmentation object
+            pcl::SACSegmentation<pcl::PointXYZRGB> seg;
+            seg.setOptimizeCoefficients(true);
+            seg.setModelType(pcl::SACMODEL_PARALLEL_PLANE);
+            seg.setAxis(Eigen::Vector3f::UnitX());
+            seg.setEpsAngle(eps_angle_);
+            seg.setMethodType(pcl::SAC_RANSAC);
+            seg.setDistanceThreshold(distance_threshold_);
+            seg.setInputCloud(passthrough_cloud_);
+            seg.segment (*inliers, *coefficients);             
+
+            // Make sure a plane was found
+            if (inliers->indices.size() != 0)
+            {
+                if ( publish_table_cloud_ )
+                {
+                    // Set points on plane to red for debugging
+                    marked_cloud_ = passthrough_cloud_->makeShared();                
+
+                    for (const auto& idx: inliers->indices)
+                    {
+                        marked_cloud_->points[idx].r = 0xFF;
+                        marked_cloud_->points[idx].g = 0x00;
+                        marked_cloud_->points[idx].b = 0x00;
+                    }
+
+                    surface_cloud_pub_.publish(marked_cloud_);
+                }
+
+                // Extract inliers from cloud
+                pcl::PointCloud<pcl::PointXYZRGB>::Ptr surface_cloud_(new pcl::PointCloud<pcl::PointXYZRGB>());
+                pcl::ExtractIndices<pcl::PointXYZRGB> extract;
+                extract.setInputCloud(passthrough_cloud_);
+                extract.setIndices(inliers);
+                extract.setNegative(false);
+                extract.filter (*surface_cloud_);
+                pcl::PointXYZRGB minPt, maxPt;
+                pcl::getMinMax3D (*surface_cloud_, minPt, maxPt);
+
+                // Build table polygon
+                geometry_msgs::PolygonStamped table_poly = buildTablePoly( minPt, maxPt );
+                table_poly_pub_.publish(table_poly);              
+        
+                // Set Calibration
+                min_max.push_back(minPt); 
+                min_max.push_back(maxPt); 
+            }
+        }
+    }
+
+    return min_max;
+}
+
+
