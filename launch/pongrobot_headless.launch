@@ -46,6 +46,8 @@
         <node name="cup_detector_node" pkg="pongrobot_perception" type="cup_detector_node" output="screen" />
     </group>
 
+    <node name="video_stream" pkg="web_video_server" type="web_video_server"/>
+
     <include file="$(find pongrobot_actuation)/launch/launcher_headless.launch" />
 </launch>
 
