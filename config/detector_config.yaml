@@ -1,7 +1,7 @@
 target_frame_id: world # frame to perform vision processing in
 
 # Initial filter paramters
-filter/passthrough_max_depth: 1.85 # background clipping dist in meters
+filter/passthrough_max_depth: 2.0 # background clipping dist in meters
 filter/passthrough_min_depth: 0.1 # foreground clipping dist in meters
 filter/object_max_height: 0.2 # how far above the detected table to put the top of the box, should be greater than the cup height
 
@@ -20,3 +20,4 @@ debug/publish_table_poly: True # Show the bounds of the detected table
 debug/publish_obj_cloud: True # Show the objects on the table
 debug/publish_cluster_cloud: True # Show the output of the clustering segmentation
 debug/publish_cup_markers: True # Show the detected cups as cylinder markers
+

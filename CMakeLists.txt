@@ -73,6 +73,9 @@ target_link_libraries( cup_detector_node ${catkin_LIBRARIES} )
 add_executable( game_logic_node src/game_logic_node.cpp src/GameManager.cpp )
 target_link_libraries( game_logic_node ${catkin_LIBRARIES} )
 
+add_executable( calibrator_node src/calibrator_node.cpp src/Calibrator.cpp )
+target_link_libraries( calibrator_node ${catkin_LIBRARIES} )
+
 add_executable( socket_telemetry_node src/socket_telemetry_node.cpp src/SocketTelemetryNode.cpp src/messagepack.cpp )
 target_link_libraries( socket_telemetry_node ${catkin_LIBRARIES} )
 target_link_libraries( socket_telemetry_node simple-websocket-server)

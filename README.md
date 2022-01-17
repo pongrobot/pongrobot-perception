@@ -42,6 +42,7 @@ Node rate config options are available in `config/rate_config.yaml` and loaded u
 - `detector`: 10.0 # rate to run the cup detector note (hz)
 - `game`: 10.0 # rate to run the game node at (hz)
 - `tf_broadcast`: 20.0 # rate to run the game node at (hz)
+- `calibrator`: 1.0 # rate to run the calibrator node at (hz)
 
 Coordinate frame config options are available in `config/frame_config.yaml` and loaded under the namespace `/frame`
 - `camera_frame_id`: camera frame id
@@ -55,19 +56,21 @@ Coordinate frame config options are available in `config/frame_config.yaml` and 
 
 Cup Detector config options are available in `config/detector_config.yaml` and loaded under the namespace `/detector`
 - `target_frame_id`: world # frame to perform vision processing in
+- `cluster/tolerance`: the euclidean clustering tolerance in meters
+- `cluster/min_cluster_size`: smallest allowable point cluster
+- `cluster/max_cluster_size`: largest allowable point cluster
+- `debug/publish_obj_cloud`: Show the objects on the table
+- `debug/publish_cluster_cloud`: Show the output of the clustering segmentation
+- `debug/publish_cup_markers`: Show the detected cups as cylinder markers
+
+Calibrator Config options are also available in `config/detector_config.yaml` and loaded under the namespace `/detector`
 - `filter/passthrough_max_depth`: background clipping dist in meters
 - `filter/passthrough_min_depth`: foreground clipping dist in meters
 - `filter/object_max_height`: how far above the detected table to put the top of the box, should be greater than the cup height
 - `segment/eps_angle`: EPS angle for RANSAC plane detection in radians
 - `segment/distance_threshold`: how close a point must be to be an inlier in meters (REP 103)
-- `cluster/tolerance`: the euclidean clustering tolerance in meters
-- `cluster/min_cluster_size`: smallest allowable point cluster
-- `cluster/max_cluster_size`: largest allowable point cluster
 - `debug/publish_table_cloud`: Show the detected table in red
 - `debug/publish_table_poly`: Show the bounds of the detected table
-- `debug/publish_obj_cloud`: Show the objects on the table
-- `debug/publish_cluster_cloud`: Show the output of the clustering segmentation
-- `debug/publish_cup_markers`: Show the detected cups as cylinder markers
 
 Game Manager config options are available in `config/game_config.yaml` and loaded under the namespace `/game`
 - `calibration_timeout`: The max amount of time the game node will wait for calibration to complete (sec)
@@ -78,7 +81,8 @@ Game Manager config options are available in `config/game_config.yaml` and loade
 Launchfiles can be found under `/launch` and coordinate running the required nodes and rviz configurations. Headless variations of many launchfiles are provided, the only difference is these do not run rviz.
 - `pongrobot_tf.launch` - generate all the robot transforms anf visualize them in rviz
 - `cup_detector.launch` - main node to launch the camera, cup detector and a visualization of the detected cups. If enabled, the additional visualization/debugging data is already configured in rviz although some may be hidden initially.
-- `perception.launch` - launch all the nodes under the perception package including the GameManager, TF broadcaster and the CupDetector
+- `perception.launch` - launch all the nodes under the perception package including the GameManager, TF broadcaster, Calibrator and the CupDetector
+- `pongrobot.launch` - launch perception launchfile along with the actuation launchfile
   
 ## Utilities
 Some useful utilities are provided under `/utils`, these are used for setting up system services, remote connections and udev rules.
