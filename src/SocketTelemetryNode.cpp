@@ -30,7 +30,7 @@ SocketTelemetryNode::SocketTelemetryNode( ros::NodeHandle nh ):tfListener(tfBuff
     trigger_pub_ = nh.advertise<std_msgs::Empty> ("/launcher/trigger", 1);
     rpm_cmd_pub_ = nh.advertise<std_msgs::Float32>( "/launcher/rpm_cmd", 1 );
     zero_gimbal_pub_ = nh.advertise<std_msgs::Empty> ("/launcher/reset", 1);
-    update_params_pub_ = nh.advertise<std_msgs::Empty> ("/detector/restart",1);
+    update_params_pub_ = nh.advertise<std_msgs::Empty> ("/calibration/request",1);
     
     // Marker subscriptions
     cup_marker_sub_ = nh.subscribe<visualization_msgs::MarkerArray>("/detector/cup_marker", 1, &SocketTelemetryNode::cup_markerCallback, this);
@@ -60,7 +60,7 @@ void SocketTelemetryNode::handleCommand(json& jsonMsg) {
     std::string key = jsonMsg["key"];
 
     if (type == 0) {
-        std::cout << "Got command '" << key << "'..." << std::endl;
+        ROS_INFO("[SocketTelemetryNode] Got command: %s", key.c_str() );
 
         // Handle commands
         if (key == "shutdown") {
@@ -107,6 +107,26 @@ void SocketTelemetryNode::handleCommand(json& jsonMsg) {
         {
             nh_.setParam("/launcher/vesc/fudge",value);
         }
+        if (key=="eps-angle")
+        {
+            nh_.setParam("/detector/segment/eps_angle",value);
+        }
+        if (key=="distance-threshold")
+        {
+            nh_.setParam("/detector/segment/distance_threshold",value);
+        }
+        if (key=="cluster-tolerance")
+        {
+            nh_.setParam("/detector/cluster/tolerance",value);
+        }
+        if (key=="min-cluster-size")
+        {
+            nh_.setParam("/detector/cluster/min_cluster_size",value);
+        }
+        if (key=="max-cluster-size")
+        {
+            nh_.setParam("/detector/cluster/max_cluster_size",value);
+        }
         
         // send empty message std messages to /dector/restart
 
@@ -140,30 +160,56 @@ void SocketTelemetryNode::update()
     j["min-depth"]=nullptr;
     j["max-height"]=nullptr;
     j["vesc-fudge"]=nullptr;
+    j["eps-angle"]=nullptr;
+    j["distance-threshold"]=nullptr;
+    j["cluster-tolerance"]=nullptr;
+    j["min-cluster-size"]=nullptr;
+    j["max-cluster-size"]=nullptr;
     j["topic"]="parameters";
     float passthrough_max_depth;
     if (nh_.getParam("/detector/filter/passthrough_max_depth", passthrough_max_depth))
     {
-        // ROS_WARN("The max depth is %f",passthrough_max_depth);
         j["max-depth"]=passthrough_max_depth;
     }
     float passthrough_min_depth;
     if (nh_.getParam("/detector/filter/passthrough_min_depth", passthrough_min_depth))
     {
-        // ROS_WARN("The min depth is %f",passthrough_min_depth);
         j["min-depth"]=passthrough_min_depth;
     }
     float object_max_height;
     if (nh_.getParam("/detecter/filter/object_max_height", object_max_height))
     {
-        // ROS_WARN("The max height is %f",object_max_height);
         j["max-height"]=object_max_height;
     }
     float fudge;
     if (nh_.getParam("/launcher/vesc/fudge", fudge))
     {
-        // ROS_WARN("The fudge is %f",fudge);
         j["vesc-fudge"]=fudge;
+    }
+    float eps_angle;
+    if (nh_.getParam("/detector/segment/eps_angle", eps_angle))
+    {
+        j["eps-angle"]=eps_angle;
+    }
+    float distance_threshold;
+    if (nh_.getParam("/detector/segment/distance_threshold", distance_threshold))
+    {
+        j["distance-threshold"]=distance_threshold;
+    }
+    float cluster_tolerance;
+    if (nh_.getParam("/detector/cluster/cluster_tolerance", cluster_tolerance))
+    {
+        j["cluster-tolerance"]=cluster_tolerance;
+    }
+    float min_cluster_size;
+    if (nh_.getParam("/detector/cluster/min_cluster_size", min_cluster_size))
+    {
+        j["min-cluster-size"]=min_cluster_size;
+    }
+    float max_cluster_size;
+    if (nh_.getParam("/detector/cluster/max_cluster_size", max_cluster_size))
+    {
+        j["max-cluster-size"]=max_cluster_size;
     }
 
 
@@ -214,9 +260,15 @@ void SocketTelemetryNode::update()
 
     json j_trajectory;
     j_trajectory["topic"]="launcher_trajectory";
-    j_trajectory["x"]=trajectory.pose.position.x;
-    j_trajectory["y"]=trajectory.pose.position.y;
-    j_trajectory["z"]=trajectory.pose.position.z;
+    j_trajectory["points"]=json::array();
+    for (int i=0; i<trajectory.points.size(); i++)
+    {
+        json j4;
+        j4["x"]=trajectory.points[i].x;
+        j4["y"]=trajectory.points[i].y;
+        j4["z"]=trajectory.points[i].z;
+        j_trajectory["vertices"].push_back(j4);
+    }
 
     //Launcher target, rpm, velocity, yaw
     json j_target;
@@ -330,16 +382,16 @@ void SocketTelemetryNode::pt_cloudCallback( const pcl::PointCloud<pcl::PointXYZR
                 if (x < -5.0 || x > 5.0) {
                     isValidCoord = false;
                 }
-                if (y < 0.0 || y > 10.0) {
+                if (y < -5.0 || y > 5.0) {
                     isValidCoord = false;
                 }
-                if (z < -5.0 || z > 5.0) {
+                if (z < 0.0 || z > 10.0) {
                     isValidCoord = false;
                 }
                 if (isValidCoord) {
                     xScaled = (uint16_t)(((x + 5.0) / 10.0) * 65535.0);
-                    yScaled = (uint16_t)(((y + 0.0) / 10.0) * 65535.0);
-                    zScaled = (uint16_t)(((z + 5.0) / 10.0) * 65535.0);
+                    yScaled = (uint16_t)(((y + 5.0) / 10.0) * 65535.0);
+                    zScaled = (uint16_t)(((z + 0.0) / 10.0) * 65535.0);
                 }
                 unsigned char const * x_bytes = reinterpret_cast<unsigned char const *>(&xScaled);
                 unsigned char const * y_bytes = reinterpret_cast<unsigned char const *>(&yScaled);
