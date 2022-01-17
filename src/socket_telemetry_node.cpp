@@ -7,7 +7,12 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "socket_telemetry_node");
     ros::NodeHandle nh;
 
-    ros::Rate loop_rate(10);
+    float loop_frq;
+    if ( !nh.getParam("/rate/socket", loop_frq) )
+    {
+        ROS_ERROR("CupDetector cannot load param: /rate/socket");
+    }
+    ros::Rate loop_rate(loop_frq);
 
     // Create the SocketTelemetryNode object
     SocketTelemetryNode socket_telemetry_node(nh);
