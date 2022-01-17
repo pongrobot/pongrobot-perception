@@ -91,7 +91,7 @@ pickTarget( )
         {
             // wait for the correct transform for up to 3 sec
             target_cup_ = tf_buffer_.transform(target_cup_, target_frame_id_, ros::Duration(3.0) ); 
-            target_cup_.pose.position.z += cup_height_/2.f; // assuming detection is the centroid of the cup, aim for the top
+            //target_cup_.pose.position.z += cup_height_/2.f; // assuming detection is the centroid of the cup, aim for the top
             target_found = true;
         }
         catch (tf2::TransformException &ex)
@@ -182,18 +182,16 @@ run()
                 state_ = GameState::CALIBRATING;
                 ROS_INFO("[GameManager] IDLE->CALIBRATING: Received calibration request");
             }
-            
-            // Process restart request
-            if (restart_request_)
+            else if (restart_request_)
             {
+                // Process restart request
                 restart_request_ = false;
                 state_ = GameState::RESTARTING;
                 ROS_INFO("[GameManager] IDLE->RESTARTING: Received restart request");
             }
-
-            // Check for ball
-            if ( has_ball_ )
+            else if ( has_ball_ )
             {
+                // Check for ball
                 state_ = GameState::AIMING;
                 ROS_INFO("[GameManager] IDLE->AIMING: Ball detected");
             }

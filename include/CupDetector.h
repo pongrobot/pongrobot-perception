@@ -60,10 +60,6 @@ class CupDetector
         ros::Duration calibration_timeout_;
 
         // Filter/Segmentation params
-        double passthrough_max_depth_;
-        double passthrough_min_depth_;
-        double eps_angle_;
-        double distance_threshold_;
         double obj_max_height_;
         double cluster_tolerance_;
         double min_cluster_size_;
@@ -76,15 +72,11 @@ class CupDetector
 
         // Point clouds
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_;
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr passthrough_cloud_;
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr marked_cloud_;
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr obj_cloud_;
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr cluster_cloud_;
 
         // Visualization data
         std::vector<Eigen::Vector3i> colorwheel_;
-        bool publish_table_cloud_;
-        bool publish_table_poly_;
         bool publish_obj_cloud_;
         bool publish_cluster_cloud_;
         bool publish_cup_markers_;
@@ -95,7 +87,6 @@ class CupDetector
         void calibrateCallback(const std_msgs::Empty::ConstPtr& msg);
 
         // Helpers
-        geometry_msgs::PolygonStamped buildTablePoly( pcl::PointXYZRGB minPt, pcl::PointXYZRGB maxPt );
         visualization_msgs::Marker buildCupMarker( int cup_index, Eigen::Vector4f centroid );
         Eigen::Vector3i getColor( int seed );
 

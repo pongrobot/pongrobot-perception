@@ -25,8 +25,6 @@ CupDetector( ros::NodeHandle nh ):
     
     // Init clouds
     cloud_.reset( new pcl::PointCloud<pcl::PointXYZRGB>() ); 
-    passthrough_cloud_.reset( new pcl::PointCloud<pcl::PointXYZRGB>() ); 
-    marked_cloud_.reset( new pcl::PointCloud<pcl::PointXYZRGB>() ); 
     obj_cloud_.reset( new pcl::PointCloud<pcl::PointXYZRGB>() ); 
     cluster_cloud_.reset( new pcl::PointCloud<pcl::PointXYZRGB>() ); 
 
@@ -84,29 +82,9 @@ load_params()
         ROS_ERROR("CupDetector cannot load param: %s/target_frame_id", nh_.getNamespace().c_str() );
     }
 
-    if ( !nh_.getParam("filter/passthrough_max_depth", passthrough_max_depth_) )
-    {
-        ROS_ERROR("CupDetector cannot load param: %s/filter/passthrough_max_depth", nh_.getNamespace().c_str() );
-    }
-
-    if ( !nh_.getParam("filter/passthrough_min_depth", passthrough_min_depth_) )
-    {
-        ROS_ERROR("CupDetector cannot load param: %s/filer/passthrough_min_depth", nh_.getNamespace().c_str() );
-    }
-
     if ( !nh_.getParam("filter/object_max_height", obj_max_height_) )
     {
         ROS_ERROR("CupDetector cannot load param: %s/filter/object_max_height", nh_.getNamespace().c_str() );
-    }
-
-    if ( !nh_.getParam("segment/eps_angle", eps_angle_) )
-    {
-        ROS_ERROR("CupDetector cannot load param: %s/segment/eps_angle", nh_.getNamespace().c_str() );
-    }
-
-    if ( !nh_.getParam("segment/distance_threshold", distance_threshold_) )
-    {
-        ROS_ERROR("CupDetector cannot load param: %s/segment/distance_threshold", nh_.getNamespace().c_str() );
     }
 
     if ( !nh_.getParam("cluster/tolerance", cluster_tolerance_) )
@@ -122,16 +100,6 @@ load_params()
     if ( !nh_.getParam("cluster/max_cluster_size", max_cluster_size_) )
     {
         ROS_ERROR("CupDetector cannot load param: %s/cluster/max_cluster_size", nh_.getNamespace().c_str() );
-    }
-
-    if ( !nh_.getParam("debug/publish_table_cloud", publish_table_cloud_) )
-    {
-        ROS_ERROR("CupDetector cannot load param: %s/debug/publish_table_cloud", nh_.getNamespace().c_str() );
-    }
-
-    if ( !nh_.getParam("debug/publish_table_poly", publish_table_poly_) )
-    {
-        ROS_ERROR("CupDetector cannot load param: %s/debug/publish_table_poly", nh_.getNamespace().c_str() );
     }
 
     if ( !nh_.getParam("debug/publish_obj_cloud", publish_obj_cloud_) )  
@@ -228,201 +196,115 @@ void
 CupDetector::
 detect()
 {
-    if ( !cloud_->empty() )
-    {
-        // Passthrough filter
-        pcl::PassThrough<pcl::PointXYZRGB> pass;
-        pass.setInputCloud(cloud_);
-        pass.setFilterFieldName("x");
-        pass.setFilterLimits(passthrough_min_depth_, passthrough_max_depth_);
-        pass.filter(*passthrough_cloud_);
+    // Check for calibration paramters 
+    std::vector<float> minPt;
+    nh_.getParam("calibration/table_plane/min", minPt);
+    std::vector<float> maxPt;
+    nh_.getParam("calibration/table_plane/max", maxPt);
 
-        if ( !passthrough_cloud_->empty() )
+    if ((!cloud_->empty()) && minPt.size() == 3 && maxPt.size() == 3)
+    { 
+        // Pull out segmented objects on table
+        pcl::CropBox<pcl::PointXYZRGB> box_filter;
+        box_filter.setMin(Eigen::Vector4f(minPt[0], minPt[1], maxPt[2], 1.0));
+        box_filter.setMax(Eigen::Vector4f(maxPt[0], maxPt[1], maxPt[2] + obj_max_height_, 1.0));
+        box_filter.setInputCloud(cloud_);
+        box_filter.filter(*obj_cloud_);
+       
+        if ( publish_obj_cloud_ )
+        { 
+            obj_cloud_pub_.publish(obj_cloud_);
+        }
+
+        if ( obj_cloud_->size() > 0 )
         {
-            // Plane detection
-            pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
-            pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+            // Cluster the objects to find targets
+            pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZRGB>);
+            tree->setInputCloud(obj_cloud_);
 
-            // Create the segmentation object
-            pcl::SACSegmentation<pcl::PointXYZRGB> seg;
-            seg.setOptimizeCoefficients(true);
-            seg.setModelType(pcl::SACMODEL_PARALLEL_PLANE);
-            seg.setAxis(Eigen::Vector3f::UnitX());
-            seg.setEpsAngle(eps_angle_);
-            seg.setMethodType(pcl::SAC_RANSAC);
-            seg.setDistanceThreshold(distance_threshold_);
-            seg.setInputCloud(passthrough_cloud_);
-            seg.segment (*inliers, *coefficients);             
+            std::vector<pcl::PointIndices> cluster_indices;
+            pcl::EuclideanClusterExtraction<pcl::PointXYZRGB> ec;
+            ec.setClusterTolerance(cluster_tolerance_);
+            ec.setMinClusterSize(min_cluster_size_);
+            ec.setMaxClusterSize(max_cluster_size_);
+            ec.setSearchMethod(tree);
+            ec.setInputCloud(obj_cloud_);
+            ec.extract(cluster_indices);
 
-            // Make sure a plane was found
-            if (inliers->indices.size() == 0)
+            // Setup visualization markers
+            visualization_msgs::MarkerArray cup_markers;
+            visualization_msgs::Marker clear_markers;
+            clear_markers.header.frame_id = target_frame_id_;    
+            clear_markers.action = visualization_msgs::Marker::DELETEALL;
+            cup_markers.markers.push_back(clear_markers);
+
+            // Cup pose output
+            geometry_msgs::PoseArray cup_pose_array;
+            cup_pose_array.header.frame_id = target_frame_id_;
+            cup_pose_array.header.stamp = ros::Time();
+
+            // Iterate through clusters
+            int cup_index =0;
+            cluster_cloud_ = obj_cloud_->makeShared();
+            cluster_cloud_->clear();
+
+            for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); ++it)
             {
-                ROS_ERROR ("Could not estimate a planar model for the given dataset.");
-            }
-            else
-            {
-                if ( publish_table_cloud_ )
+                if ( publish_cluster_cloud_ )
                 {
-                    // Set points on plane to red for debugging
-                    marked_cloud_ = passthrough_cloud_->makeShared();                
-
-                    for (const auto& idx: inliers->indices)
+                    // Build cluster visualization
+                    for (const auto& idx : it->indices)
                     {
-                        marked_cloud_->points[idx].r = 0xFF;
-                        marked_cloud_->points[idx].g = 0x00;
-                        marked_cloud_->points[idx].b = 0x00;
+                        pcl::PointXYZRGB point = (*obj_cloud_)[idx];
+                        Eigen::Vector3i color = getColor( cup_index );
+                        point.r = color[0];
+                        point.g = color[1];
+                        point.b = color[2];
+                        
+                        cluster_cloud_->push_back( point );
                     }
-
                 }
-
-                // Extract inliers from cloud
-                pcl::PointCloud<pcl::PointXYZRGB>::Ptr surface_cloud_(new pcl::PointCloud<pcl::PointXYZRGB>());
-                pcl::ExtractIndices<pcl::PointXYZRGB> extract;
-                extract.setInputCloud(passthrough_cloud_);
-                extract.setIndices(inliers);
-                extract.setNegative(false);
-                extract.filter (*surface_cloud_);
-                pcl::PointXYZRGB minPt, maxPt;
-                pcl::getMinMax3D (*surface_cloud_, minPt, maxPt);
-
-                // Build table polygon
-                if ( publish_table_poly_ )
-                {
-                    geometry_msgs::PolygonStamped table_poly = buildTablePoly( minPt, maxPt );
-                }
-
-                // Pull out segmented objects on table
-                pcl::CropBox<pcl::PointXYZRGB> box_filter;
-                box_filter.setMin(Eigen::Vector4f(minPt.x, minPt.y, maxPt.z, 1.0));
-                box_filter.setMax(Eigen::Vector4f(maxPt.x, maxPt.y, maxPt.z + obj_max_height_, 1.0));
-                box_filter.setInputCloud(cloud_);
-                box_filter.filter(*obj_cloud_);
-               
-                if ( publish_obj_cloud_ )
-                { 
-                    obj_cloud_pub_.publish(obj_cloud_);
-                }
-
-                // Cluster the objects to find targets
-                pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZRGB>);
-                tree->setInputCloud(obj_cloud_);
-
-                std::vector<pcl::PointIndices> cluster_indices;
-                pcl::EuclideanClusterExtraction<pcl::PointXYZRGB> ec;
-                ec.setClusterTolerance(cluster_tolerance_);
-                ec.setMinClusterSize(min_cluster_size_);
-                ec.setMaxClusterSize(max_cluster_size_);
-                ec.setSearchMethod(tree);
-                ec.setInputCloud(obj_cloud_);
-                ec.extract(cluster_indices);
-
-                // Setup visualization markers
-                visualization_msgs::MarkerArray cup_markers;
-                visualization_msgs::Marker clear_markers;
-                clear_markers.header.frame_id = target_frame_id_;    
-                clear_markers.action = visualization_msgs::Marker::DELETEALL;
-                cup_markers.markers.push_back(clear_markers);
-    
-                // Cup pose output
-                geometry_msgs::PoseArray cup_pose_array;
-                cup_pose_array.header.frame_id = target_frame_id_;
-                cup_pose_array.header.stamp = ros::Time();
-
-                // Iterate through clusters
-                int cup_index =0;
-                cluster_cloud_ = obj_cloud_->makeShared();
-                cluster_cloud_->clear();
-
-                for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); ++it)
-                {
-                    if ( publish_cluster_cloud_ )
-                    {
-                        // Build cluster visualization
-                        for (const auto& idx : it->indices)
-                        {
-                            pcl::PointXYZRGB point = (*obj_cloud_)[idx];
-                            Eigen::Vector3i color = getColor( cup_index );
-                            point.r = color[0];
-                            point.g = color[1];
-                            point.b = color[2];
-                            
-                            cluster_cloud_->push_back( point );
-                        }
-                    }
-                    // Get centroid of cup
-                    Eigen::Vector4f centroid;
-                    if ( pcl::compute3DCentroid(*obj_cloud_, it->indices, centroid) )
-                    {
-                        if ( publish_cup_markers_ )
-                        {
-                            cup_markers.markers.push_back( buildCupMarker(cup_index, centroid) );
-                        }
-
-                        // create Pose
-                        geometry_msgs::Pose cup_pose;
-                        cup_pose.position.x = centroid[0];
-                        cup_pose.position.y = centroid[1];
-                        cup_pose.position.z = centroid[2];
-                        cup_pose_array.poses.push_back(cup_pose);
-
-                        cup_index ++;
-                    }
-                    
-                }
-                
-                // Publish Cup data
-                if ( cup_markers.markers.size() > 0 ) 
+                // Get centroid of cup
+                Eigen::Vector4f centroid;
+                if ( pcl::compute3DCentroid(*obj_cloud_, it->indices, centroid) )
                 {
                     if ( publish_cup_markers_ )
                     {
-                        marker_pub_.publish(cup_markers); 
-                    }
-                    if ( publish_cluster_cloud_ )
-                    {
-                        cluster_cloud_pub_.publish(cluster_cloud_);
+                        cup_markers.markers.push_back( buildCupMarker(cup_index, centroid) );
                     }
 
-                    // Output cup positions
-                    cup_pose_pub_.publish(cup_pose_array);
+                    pcl::PointXYZRGB minPt, maxPt;
+                    pcl::getMinMax3D (*cluster_cloud_, minPt, maxPt);
+
+                    // create Pose
+                    geometry_msgs::Pose cup_pose;
+                    cup_pose.position.x = centroid[0];
+                    cup_pose.position.y = centroid[1];
+                    cup_pose.position.z = maxPt.z;
+                    cup_pose_array.poses.push_back(cup_pose);
+
+                    cup_index ++;
                 }
+                
+            }
+
+            // Publish Cup data
+            if ( cup_markers.markers.size() > 0 ) 
+            {
+                if ( publish_cup_markers_ )
+                {
+                    marker_pub_.publish(cup_markers); 
+                }
+                if ( publish_cluster_cloud_ )
+                {
+                    cluster_cloud_pub_.publish(cluster_cloud_);
+                }
+
+                // Output cup positions
+                cup_pose_pub_.publish(cup_pose_array);
             }
         }
     }
-}
-
-
-geometry_msgs::PolygonStamped
-CupDetector::
-buildTablePoly( pcl::PointXYZRGB minPt, pcl::PointXYZRGB maxPt )
-{
-    // Initialize message
-    geometry_msgs::PolygonStamped table_poly;
-    table_poly.header.stamp = ros::Time::now();
-    table_poly.header.frame_id = target_frame_id_;
-    
-    // build rectangle from extreme points 
-    geometry_msgs::Point32 vertex;
-    vertex.x = minPt.x;
-    vertex.y = minPt.y;
-    vertex.z = maxPt.z;
-    table_poly.polygon.points.push_back(vertex);
-
-    vertex.x = maxPt.x;
-    vertex.y = minPt.y;
-    vertex.z = maxPt.z;
-    table_poly.polygon.points.push_back(vertex);
-
-    vertex.x = maxPt.x;
-    vertex.y = maxPt.y;
-    vertex.z = maxPt.z;
-    table_poly.polygon.points.push_back(vertex);
-
-    vertex.x = minPt.x;
-    vertex.y = maxPt.y;
-    vertex.z = maxPt.z;
-    table_poly.polygon.points.push_back(vertex);
-
-    return table_poly;
 }
 
 visualization_msgs::Marker

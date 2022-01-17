@@ -36,7 +36,7 @@ run()
       if (calibration_.size() > 0)
       {
           run_calibration_ = false;
-          ROS_INFO ("Calibration Successful"); 
+          ROS_INFO ("[Calibrator] Calibration Successful"); 
           
           // Send updated calibration to parameter server          
           publishCalibration();
@@ -138,13 +138,16 @@ publishCalibration()
         max.push_back(calibration_[1].y);
         max.push_back(calibration_[1].z);
         nh_.setParam("calibration/table_plane/max", max);
+
+        ROS_WARN("[Calibrator] Min: %f %f %f", min[0], min[1], min[2]);
+        ROS_WARN("[Calibrator] Max: %f %f %f", max[0], max[1], max[2]);
     }
     else
     {
-        std::vector<float> min{0,0,0};
+        std::vector<float> min;
         nh_.setParam("calibration/table_plane/min", min);
 
-        std::vector<float> max{0,0,0};
+        std::vector<float> max;
         nh_.setParam("calibration/table_plane/max", max);
   
     }
