@@ -139,8 +139,6 @@ publishCalibration()
         max.push_back(calibration_[1].z);
         nh_.setParam("calibration/table_plane/max", max);
 
-        ROS_WARN("[Calibrator] Min: %f %f %f", min[0], min[1], min[2]);
-        ROS_WARN("[Calibrator] Max: %f %f %f", max[0], max[1], max[2]);
     }
     else
     {
