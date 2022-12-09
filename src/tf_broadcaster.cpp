@@ -34,6 +34,7 @@ void poseCallback(const geometry_msgs::Pose::ConstPtr& msg)
     // Remove yaw component from tf
     tf2::Quaternion tf_quaternion;
     tf_quaternion = sensor_orientation * yaw_only.inverse();
+    tf_quaternion.normalize();
     geometry_msgs::Quaternion rp_orientation = tf2::toMsg(tf_quaternion);
     
     // Identity Quaternion
