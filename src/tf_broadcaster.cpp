@@ -26,6 +26,7 @@ void poseCallback(const geometry_msgs::Pose::ConstPtr& msg)
     double roll, pitch, yaw;
     tf2::Quaternion sensor_orientation;
     tf2::convert(msg->orientation, sensor_orientation);
+    sensor_orientation.normalize();
     tf2::Matrix3x3 m(sensor_orientation);
     m.getRPY(roll, pitch, yaw);
     tf2::Quaternion yaw_only;
