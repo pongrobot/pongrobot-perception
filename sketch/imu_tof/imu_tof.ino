@@ -13,8 +13,6 @@
 VL53L0X sensor;
 uint16_t range;
 
-#define INTERRUPT_PIN 7
-
 // ROS data
 ros::NodeHandle  nh;
 geometry_msgs::Pose pose;
@@ -27,7 +25,6 @@ uint8_t mpuIntStatus;   // holds actual interrupt status byte from MPU
 uint8_t devStatus;      // return status after each device operation (0 = success, !0 = error)
 uint16_t fifoCount;     // count of all bytes currently in FIFO
 uint8_t fifoBuffer[64]; // FIFO storage buffer
-volatile bool mpuInterrupt = false;     // indicates whether MPU interrupt pin has gone high
 
 // orientation/motion vars
 Quaternion q;
@@ -76,19 +73,17 @@ void imuSetup()
   #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
     Fastwire::setup(400, true);
   #endif
-
-  pinMode(INTERRUPT_PIN, INPUT);
   
   mpu.initialize();
   devStatus = mpu.dmpInitialize();  
 
-  // If DMP has intialized, continue setup
+  // If DMP has initalized, continue setup
   if (devStatus == 0) 
   {
+    mpu.CalibrateAccel(6);
     mpu.CalibrateGyro(6);
     mpu.setDMPEnabled(true);
     mpuIntStatus = mpu.getIntStatus();
-    attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), dmpDataReady, RISING);
     dmpReady = true;
   }
 }
@@ -102,8 +97,4 @@ void getImuData()
   { 
     mpu.dmpGetQuaternion(&q, fifoBuffer);
   }
-}
-
-void dmpDataReady() {
-  mpuInterrupt = true;
 }
