@@ -30,6 +30,7 @@ void
 GameManager::
 cupArrayCallback( const geometry_msgs::PoseArray::ConstPtr& msg )
 {
+    // TODO: Create filter, ingest data and handle detection association
     detection_array_ = *msg;
 }
 

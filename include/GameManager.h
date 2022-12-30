@@ -10,6 +10,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Empty.h>
+#include "Cup.h"
 
 enum GameState
 {

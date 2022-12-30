@@ -63,6 +63,8 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+add_library(Cup src/Cup.cpp)
+
 # executables 
 add_executable( tf_broadcaster src/tf_broadcaster.cpp )
 target_link_libraries( tf_broadcaster ${catkin_LIBRARIES} )
@@ -71,7 +73,7 @@ add_executable( cup_detector_node src/cup_detector_node.cpp src/CupDetector.cpp 
 target_link_libraries( cup_detector_node ${catkin_LIBRARIES} )
 
 add_executable( game_logic_node src/game_logic_node.cpp src/GameManager.cpp )
-target_link_libraries( game_logic_node ${catkin_LIBRARIES} )
+target_link_libraries( game_logic_node ${catkin_LIBRARIES} Cup)
 
 add_executable( calibrator_node src/calibrator_node.cpp src/Calibrator.cpp )
 target_link_libraries( calibrator_node ${catkin_LIBRARIES} )
