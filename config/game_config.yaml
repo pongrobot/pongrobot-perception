@@ -1,3 +1,6 @@
 calibration_timeout: 30.0 # The max amount of time the game node will wait for calibration to complete (sec)
 launcher_timeout: 20.0 # The max amount of time the game node will wait for launcher confimation before assuming failure (sec)
 cup_height: 0.15 # TODO: remove this and calculate the cup height
+cup_association_threshold: 0.005 # The threshold for if a cup is considered associated with an existing detection
+cup_data_timeout: 5.0 # Hold long a cup will live after it receives it's last detection (sec)
+

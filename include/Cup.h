@@ -10,21 +10,22 @@
 class Cup
 {
     public:
-                                    Cup( const uint16_t cup_id, const std::string frame_id);
-        uint16_t                    getId();
-        bool                        insertDetection( const geometry_msgs::PoseStamped detection);
+                                    Cup(std::string frame_id);
+                                    Cup();
+        bool                        assignDetection( const geometry_msgs::PoseStamped detection);
         ros::Time                   lastDetectionTime();
         geometry_msgs::PoseStamped  getPose();
+
+    public:
+            static const uint8_t MAX_DETECTIONS_PER_CUP = 10;
         
     private:
-        uint16_t                                id_;
-        ros::Time                               lastDetection_;
+        ros::Time                               last_detection_;
+        ros::Time                               first_detected_;
+
         std::list<geometry_msgs::PoseStamped>   detections_;
         geometry_msgs::PoseStamped              estimated_pose_;
 
-    public:
-            const uint8_t MAX_DETECTIONS_PER_CUP = 10;
-
-};
+}; 
 
 #endif

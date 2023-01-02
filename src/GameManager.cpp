@@ -8,7 +8,8 @@ GameManager( ros::NodeHandle nh ):
     shot_success_(false),
     calibration_request_(false),
     restart_request_(false),
-    state_(GameState::IDLE) 
+    state_(GameState::IDLE),
+    next_cup_id_(0)
 {
     nh_ = nh;
     
@@ -29,9 +30,55 @@ GameManager( ros::NodeHandle nh ):
 void
 GameManager::
 cupArrayCallback( const geometry_msgs::PoseArray::ConstPtr& msg )
-{
-    // TODO: Create filter, ingest data and handle detection association
+{   
     detection_array_ = *msg;
+
+    // Ingest the incoming detections
+    for(int i = 0; i < msg->poses.size(); i++)
+    { 
+        bool is_new_cup = true;
+
+        geometry_msgs::PoseStamped p;
+        p.header = msg->header;
+        p.pose = msg->poses[i];
+
+        // Try to find the associated cup
+        for (auto j : cup_map_)
+        {
+            double distance = calculateDistance(msg->poses[i], j.second);
+            
+            if ( distance <= cup_association_threshold_ )
+            {
+                // Found associated cup, send it the detection
+                j.second.assignDetection(p);
+                is_new_cup = false;
+            }
+        }
+
+        if( is_new_cup )
+        {
+            // Create new cup
+            while ( cup_map_.count(next_cup_id_) != 0)
+            {
+                next_cup_id_++;
+            }
+            
+            // TODO: configure expected frame
+            Cup c(msg->header.frame_id);
+            cup_map_[next_cup_id_] = c;
+            cup_map_[next_cup_id_].assignDetection(p);
+            next_cup_id_++;
+        }
+    }
+
+    // Cup Cleanup
+    for (auto i : cup_map_)
+    {
+        if ( ros::Time::now() - i.second.lastDetectionTime() > cup_data_timeout_)
+        {
+            cup_map_.erase(i.first);
+        }
+    }
 }
 
 void
@@ -76,6 +123,19 @@ pickTarget( )
 {
     bool target_found = false;
 
+    if ( !cup_map_.empty() )
+    {
+        // Set up target header
+        target_cup_.header.seq = target_seq_id_;
+        target_cup_.header.stamp = ros::Time::now();
+        target_cup_.header.frame_id = detection_array_.header.frame_id;
+        target_seq_id_++;
+
+        // TODO: select cup
+    }
+
+    #if 0
+    // Old routine
     if ( !detection_array_.poses.empty() )
     {
         // Set up target header
@@ -100,6 +160,7 @@ pickTarget( )
             ROS_WARN("%s",ex.what());
         } 
     }
+    #endif
 
     return target_found;
 }
@@ -118,6 +179,11 @@ loadParams()
         ROS_WARN("GameManager cannot load param: %s/cup_height", nh_.getNamespace().c_str() );
     }
 
+    if ( !nh_.getParam("cup_association_threshold_", cup_association_threshold_) )
+    {
+        ROS_WARN("GameManager cannot load param: %s/cup_association_threshold", nh_.getNamespace().c_str() );
+    }
+
     double launcher_timeout_val;
     if ( !nh_.getParam("launcher_timeout", launcher_timeout_val) )
     {
@@ -130,8 +196,14 @@ loadParams()
     {
         ROS_WARN("GameManager cannot load param: %s/calibration_timeout", nh_.getNamespace().c_str() );
     }
-    calibration_timeout_ = ros::Duration(calibration_timeout_val);    
+    calibration_timeout_ = ros::Duration(calibration_timeout_val);
 
+    double cup_data_timeout_val;
+    if ( !nh_.getParam("cup_data_timeout", cup_data_timeout_val) )
+    {
+        ROS_WARN("GameManager cannot load param: %s/cup_data_timeout", nh_.getNamespace().c_str() );
+    }
+    cup_data_timeout_ = ros::Duration(cup_data_timeout_val);    
 }
 
 void
@@ -241,4 +313,13 @@ run()
             break;
         } 
     }
+}
+
+double
+GameManager::
+calculateDistance(const geometry_msgs::Pose detection, Cup c)
+{
+    return sqrt( pow((c.getPose().pose.position.x - detection.position.x) , 2) +
+                 pow((c.getPose().pose.position.y - detection.position.y) , 2) +
+                 pow((c.getPose().pose.position.z - detection.position.z) , 2) );
 }

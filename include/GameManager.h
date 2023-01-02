@@ -11,6 +11,7 @@
 #include <std_msgs/Bool.h>
 #include <std_msgs/Empty.h>
 #include "Cup.h"
+#include <unordered_map>
 
 enum GameState
 {
@@ -69,11 +70,17 @@ class GameManager
         ros::Time calibration_sent_;
         ros::Duration launcher_timeout_;
         ros::Duration calibration_timeout_;
+        ros::Duration cup_data_timeout_;
         double cup_height_;
+        double cup_association_threshold_;
+        uint16_t next_cup_id_;
+        
+        std::unordered_map<uint16_t, Cup> cup_map_;
         
         // Utilities
         bool pickTarget();
         void loadParams();
+        double calculateDistance(const geometry_msgs::Pose detection, Cup c);
 };
 
 #endif

@@ -1,42 +1,51 @@
 #include "Cup.h"
 
 Cup::
-Cup(const uint16_t cup_id, const std::string frame_id):
-    id_(cup_id)
+Cup(std::string frame_id)
 {
-    lastDetection_ = ros::Time::now();
-
+    last_detection_ = ros::Time::now();
+    first_detected_ = ros::Time::now();
+    
     estimated_pose_.header.seq = 0;
     estimated_pose_.header.stamp = ros::Time::now();
     estimated_pose_.header.frame_id = frame_id;
 
     estimated_pose_.pose.orientation.w = 1;
     estimated_pose_.pose.orientation.x = 0;
-    estimated_pose_.pose.orientation.y = 1;
+    estimated_pose_.pose.orientation.y = 0;
     estimated_pose_.pose.orientation.z = 0;
 }
 
-uint16_t
 Cup::
-getId()
+Cup()
 {
-    return id_;
+    last_detection_ = ros::Time::now();
+    first_detected_ = ros::Time::now();
+
+    estimated_pose_.header.seq = 0;
+    estimated_pose_.header.stamp = ros::Time::now();
+    estimated_pose_.header.frame_id = "world";
+
+    estimated_pose_.pose.orientation.w = 1;
+    estimated_pose_.pose.orientation.x = 0;
+    estimated_pose_.pose.orientation.y = 0;
+    estimated_pose_.pose.orientation.z = 0;
 }
 
 bool
 Cup::
-insertDetection( const geometry_msgs::PoseStamped detection )
+assignDetection( const geometry_msgs::PoseStamped detection )
 {
     // Make sure the detection is in the expected frame
     if (detection.header.frame_id != estimated_pose_.header.frame_id )
     {
-        ROS_WARN("Cup %d: Attempting to assign detection with invalid frame id (%s)", id_, detection.header.frame_id.c_str());
+        ROS_WARN("Attempting to assign detection with invalid frame id (%s)", detection.header.frame_id.c_str());
         return false;
     }
 
     // Ingest the detection
     detections_.push_front(detection);
-    lastDetection_ = detection.header.stamp;
+    last_detection_ = detection.header.stamp;
 
     // Expire old data to only keep the most recent detections
     while ( detections_.size() > MAX_DETECTIONS_PER_CUP )
@@ -64,8 +73,6 @@ insertDetection( const geometry_msgs::PoseStamped detection )
     estimated_pose_.pose.position.y = y;
     estimated_pose_.pose.position.z = z;
 
-    // TODO: Calculate variance/other useful stats
-
     return true;
 }
 
@@ -73,7 +80,7 @@ ros::Time
 Cup::
 lastDetectionTime()
 {
-    return lastDetection_;
+    return last_detection_; 
 }
 
 geometry_msgs::PoseStamped
