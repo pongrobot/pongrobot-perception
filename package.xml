@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>pongrobot_perception</name>
-  <version>1.0.1</version>
+  <version>2.0.0</version>
   <description>Package to handle camera data for the brobot pong robot</description>
 
   <maintainer email="andrew@andrewtgutierrez.com">Andrew Gutierrez</maintainer>
@@ -19,8 +19,5 @@
   <build_depend>libpcl-all-dev</build_depend>
   <exec_depend>libpcl-all</exec_depend>
   <exec_depend>realsense2_camera</exec_depend>
-  <exec_depend>rosserial_python</exec_depend>
-  <exec_depend>pongrobot_actuation</exec_depend>
-  <exec_depend>rosbridge_server</exec_depend>
 
 </package>

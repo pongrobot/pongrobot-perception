@@ -1,0 +1,29 @@
+# Node level params
+rate: 5.0 # rate to run the detector (hz)
+frame_id: world # the frame ID used by the processing pipeline
+
+# Pipeline params
+pipeline/frames_to_keep: 5 # the number of camera frames to merge into the pipeline
+
+# Crop Box Params
+crop_box/max_object_height: 0.2 # how far above the detected table to put the top of the box, should be greater than the cup height
+
+# Statistical Outlier Removal Params
+sor/mean_k: 50
+sor/std_dev_mul_thresh: 1.0
+
+# Voxel Grid Params
+vgf/leaf_size_x: 0.01
+vgf/leaf_size_y: 0.01
+vgf/leaf_size_z: 0.01
+
+# Cluster Extraction Params
+ece/cluster_tolerance: 0.007 # in meters
+ece/min_cluster_size: 100 # smallest allowable point cluster
+ece/max_cluster_size: 20000 # largest allowable point cluster
+ece/max_cluster_width: 0.15 # threshold for horizontally splitting cups
+
+# Debugging flags
+debug/publish_filtered_cloud: True # Show the output of the cloud after the filter
+debug/publish_cluster_cloud: True # Show the output of the clustering segmentation
+debug/publish_cup_markers: True # Show the detected cups as cylinder markers

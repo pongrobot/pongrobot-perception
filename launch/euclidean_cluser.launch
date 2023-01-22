@@ -1,0 +1,15 @@
+<launch>
+    <arg name="no_debug" default="false"/>
+
+    <group ns="euclidean_cluster">
+        <rosparam file="$(find pongrobot_perception)/config/euclidean_cluster_pipeline.yaml" />
+        <node name="pipeline" pkg="pongrobot_perception" type="euclidean_cluster_pipeline" output="screen"/>
+        
+        <!-- disable all debugging if desired-->
+        <group if="$(eval no_debug == 'false')">
+            <param name="debug/publish_filtered_cloud" type="bool"  value="True"/>
+            <param name="debug/publish_cluster_cloud" type="bool"  value="True"/>
+            <param name="debug/publish_cup_markers" type="bool"  value="True"/>
+        </group>
+    </group>
+</launch>

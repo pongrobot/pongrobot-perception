@@ -1,0 +1,27 @@
+# Node level params
+rate: 10.0 # rate to run the detector (hz)
+frame_id: world # the frame ID used by the processing pipeline
+
+# Pipeline params
+pipeline/frames_to_keep: 10 # the number of camera frames to merge into the pipeline
+
+# Crop Box Params
+crop_box/min: [ -5.0, -5.0,  0.1 ]
+crop_box/max: [  5.0,  5.0,  2.0 ]
+
+# Statistical Outlier Removal Params
+sor/mean_k: 50
+sor/std_dev_mul_thresh: 1.0
+
+# Voxel Grid Params
+vgf/leaf_size_x: 0.01
+vgf/leaf_size_y: 0.01
+vgf/leaf_size_z: 0.01
+
+# SAC Segmentation Params
+sac/eps_angle: 0.2 # EPS angle in Radians
+sac/distance_thresh: 0.02 # how close a point must be to be an inlier in meters (REP 103)
+
+# Debugging flags
+debug/publish_table_cloud: True # Show the cloud for the table surface
+debug/publish_table_poly: True # Show the table polygon

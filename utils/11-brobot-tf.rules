@@ -1,2 +1,0 @@
-SUBSYSTEMS=="usb", KERNEL=="ttyACM[0-9]*", MODE="666", ACTION=="add", ATTRS{product}=="Brobot TF", SYMLINK+="brobot_tf", GROUP="dialout"
-

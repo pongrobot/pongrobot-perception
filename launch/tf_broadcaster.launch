@@ -1,0 +1,6 @@
+<launch>
+    <group ns="tf_publisher">
+        <rosparam file="$(find pongrobot_perception)/config/tf_broadcast_node.yaml" />
+        <node name="tf_broadcast_node" pkg="pongrobot_perception" type="tf_broadcast_node" output="screen" />
+    </group>
+</launch>

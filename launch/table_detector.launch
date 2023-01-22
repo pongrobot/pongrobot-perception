@@ -1,0 +1,14 @@
+<launch>
+    <arg name="no_debug" default="false"/>
+
+    <group ns="table_detector">
+        <rosparam file="$(find pongrobot_perception)/config/table_detection_pipeline.yaml" />
+        <node name="pipeline" pkg="pongrobot_perception" type="table_detection_pipeline" output="screen"/>
+
+        <!-- disable all debugging if desired-->
+        <group if="$(eval no_debug == 'false')">
+            <param name="debug/publish_table_cloud" type="bool"  value="True"/>
+            <param name="debug/publish_table_poly" type="bool"  value="True"/>
+        </group>
+    </group>
+</launch>

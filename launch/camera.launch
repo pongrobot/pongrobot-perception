@@ -1,0 +1,27 @@
+<launch>
+    <arg name="framerate"             default="15"/>
+
+    <!-- Load the Realsense-->
+    <group ns="camera">
+        <include file="$(find realsense2_camera)/launch/includes/nodelet.launch.xml">
+            <!-- Configure depth frame-->
+            <arg name="enable_depth"      value="true"/>
+            <arg name="depth_width"       value="640"/>
+            <arg name="depth_height"      value="480"/>
+            <arg name="depth_fps"         value="$(arg framerate)"/>
+            <arg name="output"            value="log"/>
+
+            <!-- Configure color frame-->
+            <arg name="enable_color"      value="true"/>
+            <arg name="color_width"       value="1920"/>
+            <arg name="color_height"      value="1080"/>
+            <arg name="color_fps"         value="$(arg framerate)"/>
+
+            <!-- Other params -->
+            <arg name="enable_confidence" value="false"/>
+            <arg name="enable_pointcloud" value="true"/>
+            <arg name="enable_sync"       value="true"/>
+            <arg name="tf_prefix"         value="camera"/>
+        </include>
+    </group>
+</launch>

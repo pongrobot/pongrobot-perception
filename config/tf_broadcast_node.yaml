@@ -1,9 +1,11 @@
+rate: 20.0 # rate to run the detector (hz)
+
 # Coordinate frame definitions
-camera_frame_id: camera_link
-world_frame_id: world
-robot_base_frame_id: robot_base
-robot_center_frame_id: robot_center
-launcher_frame_id: launcher
+frame/camera_frame_id: camera_link
+frame/world_frame_id: world
+frame/robot_base_frame_id: robot_base
+frame/robot_center_frame_id: robot_center
+frame/launcher_frame_id: launcher
 
 # Geometric fixed frame offsets
 geometry/camera_x_offset: 0.133 # X offset from robot center to camera frame
