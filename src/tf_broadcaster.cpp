@@ -60,7 +60,7 @@ void poseCallback(const geometry_msgs::Pose::ConstPtr& msg)
     robot_base_center_tf.child_frame_id = robot_center_frame_id;
     robot_base_center_tf.transform.translation.x = 0.f;
     robot_base_center_tf.transform.translation.y = 0.f;
-    robot_base_center_tf.transform.translation.z = msg->position.z;
+    robot_base_center_tf.transform.translation.z = 1.0f; //msg->position.z;
     robot_base_center_tf.transform.rotation = identity;
     br.sendTransform(robot_base_center_tf);
     

@@ -67,7 +67,9 @@ class SocketTelemetryNode
         ros::Publisher zero_gimbal_pub_;
         ros::Publisher update_params_pub_;
 
-        
+        ros::Publisher serial_console_pub_;
+        ros::Subscriber serial_console_sub_;
+
         uint64_t last_pt_cloud_time=0;
 
 
