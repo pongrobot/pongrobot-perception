@@ -82,7 +82,7 @@ void SocketTelemetryNode::handleCommand(json& jsonMsg) {
         }
         if (key == "spin_up_motors") {
             std_msgs::Float32 request;
-            request.data = 1000.0f;
+            request.data = 2000.0f;
             rpm_cmd_pub_.publish(request);
         }
         if (key == "calibrate"){
