@@ -98,8 +98,8 @@ class SocketTelemetryNode
 
         // RPM and Yaw and velocity commands
         ros::Subscriber yaw_cmd_sub_;
-        void yaw_cmdCallback(const std_msgs::Int8::ConstPtr& msg);
-        std_msgs::Int8 yaw_cmd;
+        void yaw_cmdCallback(const std_msgs::Float32::ConstPtr& msg);
+        std_msgs::Float32 yaw_cmd;
 
         ros::Subscriber rpm_cmd_sub_;
         void rpm_cmdCallback(const std_msgs::Float32::ConstPtr& msg);

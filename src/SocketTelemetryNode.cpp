@@ -38,7 +38,7 @@ SocketTelemetryNode::SocketTelemetryNode( ros::NodeHandle nh ):tfListener(tfBuff
     launcher_target_sub_ = nh.subscribe<visualization_msgs::Marker>("/launcher/launcher_target", 1, &SocketTelemetryNode::launcher_targetCallback, this);
     
     table_sub_ = nh.subscribe<geometry_msgs::PolygonStamped>("/detector/table", 1, &SocketTelemetryNode::tableCallback, this);
-    yaw_cmd_sub_ = nh.subscribe<std_msgs::Int8>("/launcher/yaw_cmd", 1, &SocketTelemetryNode::yaw_cmdCallback, this);
+    yaw_cmd_sub_ = nh.subscribe<std_msgs::Float3d>("/launcher/yaw_cmd", 1, &SocketTelemetryNode::yaw_cmdCallback, this);
     rpm_cmd_sub_ = nh.subscribe<std_msgs::Float32>("/launcher/rpm_cmd", 1, &SocketTelemetryNode::rpm_cmdCallback, this);
     velocity_cmd_sub_ = nh.subscribe<std_msgs::Float32>("/launcher/velocity_cmd", 1, &SocketTelemetryNode::velocity_cmdCallback, this);
     pt_cloud_sub_ = nh.subscribe<pcl::PointCloud<pcl::PointXYZRGB>>("/camera/depth/color/points", 1, &SocketTelemetryNode::pt_cloudCallback, this);
@@ -330,7 +330,7 @@ void SocketTelemetryNode::tableCallback(const geometry_msgs::PolygonStamped::Con
 {
     table_poly = *msg;
 }
-void SocketTelemetryNode::yaw_cmdCallback(const std_msgs::Int8::ConstPtr& msg)
+void SocketTelemetryNode::yaw_cmdCallback(const std_msgs::Float32::ConstPtr& msg)
 {
     yaw_cmd = *msg;
 }
