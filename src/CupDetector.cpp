@@ -384,7 +384,7 @@ void CupDetector::split_clusters(
     try
     {
         auto split_clusters = std::make_shared<std::vector<pcl::PointIndices>>();
-        for (auto& cluster : *clusters)
+        for (auto& cluster : clusters)
         {
             // find cluster extent
             Eigen::Vector4f min_pt, max_pt, extent ;
