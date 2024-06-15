@@ -117,6 +117,17 @@ load_params()
         ROS_ERROR("CupDetector cannot load param: %s/debug/publish_cup_markers", nh_.getNamespace().c_str() );
     }
 
+    if ( !nh_.getParam("/cluster_splitting/enabled", cluster_splitting_) )
+    {
+        ROS_ERROR("CupDetector cannot load param: /cluster_splitting/enabled");
+    }
+
+    if ( !nh_.getParam("/cluster_splitting/max_width_m", max_cluster_width_) )
+    {
+        ROS_ERROR("CupDetector cannot load param: /cluster_splitting/max_width_m");
+    }
+
+
     double calibration_timeout_val;
     if ( !nh_.getParam("/game/calibration_timeout", calibration_timeout_val) )
     {
@@ -222,6 +233,7 @@ detect()
             pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZRGB>);
             tree->setInputCloud(obj_cloud_);
 
+            // Run clustering
             std::vector<pcl::PointIndices> cluster_indices;
             pcl::EuclideanClusterExtraction<pcl::PointXYZRGB> ec;
             ec.setClusterTolerance(cluster_tolerance_);
@@ -230,6 +242,15 @@ detect()
             ec.setSearchMethod(tree);
             ec.setInputCloud(obj_cloud_);
             ec.extract(cluster_indices);
+
+            // Split clusters
+            if (cluster_splitting_)
+            {
+                // split in x, then in y
+                split_clusters(obj_cloud_, cluster_indices, 0);
+                split_clusters(obj_cloud_, cluster_indices, 1);
+            }
+
 
             // Setup visualization markers
             visualization_msgs::MarkerArray cup_markers;
@@ -345,5 +366,74 @@ getColor( int seed )
     {
         ROS_WARN("Colorwheel uninitialized, returning RED");
         return Eigen::Vector3i( 255, 0, 0);
+    }
+}
+
+void CupDetector::split_clusters(
+    const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& cloud,
+    std::shared_ptr<std::vector<pcl::PointIndices>>& clusters,
+    const int& dim)
+{
+    // input dimension validation
+    if (dim < 0 || dim > 2)
+    {
+        ROS_ERROR("Failed to split clusters along invalid dimenstion %d. Valid dimentions: [0, 1, 2]", dim); 
+        return;
+    }
+
+    try
+    {
+        auto split_clusters = std::make_shared<std::vector<pcl::PointIndices>>();
+        for (auto& cluster : *clusters)
+        {
+            // find cluster extent
+            Eigen::Vector4f min_pt, max_pt, extent ;
+            pcl::getMinMax3D(*cloud, cluster, min_pt, max_pt);
+            extent = max_pt - min_pt;
+
+            // calculate number of splits
+            int num_subclusters = std::round(extent[dim]/max_cluster_width_);
+            if (num_subclusters <= 1)
+            {
+                // no splits needed
+                split_clusters->push_back(cluster);
+            }
+            else
+            {
+                // split into subclusters 
+                float subcluster_delta = extent[dim] / num_subclusters;
+                for(int i = 0; i < num_subclusters; i++)
+                {
+                    // find subcluster bounds
+                    float subcluster_min = min_pt[dim] + i * subcluster_delta;
+                    float subcluster_max = min_pt[dim] + (i+1) * subcluster_delta;
+
+                    // find subcluster indices
+                    pcl::PointIndices subcluster;
+                    for (const auto& point_idx : cluster.indices)
+                    {
+                        float point_val;
+                        if (dim == 0)
+                            point_val = (*cloud)[point_idx].x;
+                        else if (dim == 1)
+                            point_val = (*cloud)[point_idx].y;
+                        else if (dim == 2)
+                            point_val = (*cloud)[point_idx].z;
+
+                        if (subcluster_min <= point_val && point_val <= subcluster_max )
+                            subcluster.indices.push_back(point_idx);
+                    }
+                    
+                    if (subcluster.indices.size() >= min_cluster_size_)
+                        split_clusters->emplace_back(std::move(subcluster));
+                }
+            }
+        }
+
+        clusters = split_clusters;
+    }
+    catch(const std::exception& e)
+    {
+        ROS_WARN("Failed to load clustering splitting params: %s", e.what());
     }
 }

@@ -65,6 +65,9 @@ class CupDetector
         double min_cluster_size_;
         double max_cluster_size_;
 
+        bool cluster_splitting_;
+        double max_cluster_width_;
+
         //Frame data
         std::string target_frame_id_;
         tf2_ros::Buffer tf_buffer_;
@@ -90,6 +93,15 @@ class CupDetector
         visualization_msgs::Marker buildCupMarker( int cup_index, Eigen::Vector4f centroid );
         Eigen::Vector3i getColor( int seed );
 
+        /**
+        * Iterate over existing clusters and attempt to split joined cups clusters
+        * 
+        * @param cloud input cloud of clusters
+        * @param clusters vector of clusters
+        * @param dim dimension to split clusters about [0=x, 1=y, 2=z]
+        */
+        void split_clusters(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& cloud, std::shared_ptr<std::vector<pcl::PointIndices>>& clusters, const int& dim);
 };
+
 
 #endif

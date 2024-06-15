@@ -14,6 +14,10 @@ cluster/tolerance: 0.007 # in meters
 cluster/min_cluster_size: 100 # smallest allowable point cluster
 cluster/max_cluster_size: 20000 # largest allowable point cluster
 
+# Cluster splitting parameters
+cluster_splitting/enabled: True # Whether to attempt to split clusters
+cluster_splitting/max_width_m: 0.11 # Max width in meters for a cluster before it gets split
+
 # Debugging flags
 debug/publish_table_cloud: True # Show the detected table in red
 debug/publish_table_poly: True # Show the bounds of the detected table
