@@ -100,7 +100,7 @@ class CupDetector
         * @param clusters vector of clusters
         * @param dim dimension to split clusters about [0=x, 1=y, 2=z]
         */
-        void split_clusters(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& cloud, std::shared_ptr<std::vector<pcl::PointIndices>>& clusters, const int& dim);
+        void split_clusters(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& cloud, std::vector<pcl::PointIndices>& clusters, const int& dim);
 };
 
 
