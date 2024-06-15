@@ -117,14 +117,14 @@ load_params()
         ROS_ERROR("CupDetector cannot load param: %s/debug/publish_cup_markers", nh_.getNamespace().c_str() );
     }
 
-    if ( !nh_.getParam("/cluster_splitting/enabled", cluster_splitting_) )
+    if ( !nh_.getParam("cluster_splitting/enabled", cluster_splitting_) )
     {
-        ROS_ERROR("CupDetector cannot load param: /cluster_splitting/enabled");
+        ROS_ERROR("CupDetector cannot load param: %s/cluster_splitting/enabled",nh_.getNamespace().c_str());
     }
 
-    if ( !nh_.getParam("/cluster_splitting/max_width_m", max_cluster_width_) )
+    if ( !nh_.getParam("cluster_splitting/max_width_m", max_cluster_width_) )
     {
-        ROS_ERROR("CupDetector cannot load param: /cluster_splitting/max_width_m");
+        ROS_ERROR("CupDetector cannot load param: %s/cluster_splitting/max_width_m",nh_.getNamespace().c_str());
     }
 
 
