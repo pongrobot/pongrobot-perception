@@ -431,7 +431,7 @@ void CupDetector::split_clusters(
         }
 
         clusters.clear();
-        for (int i = 0; i < split_clusters-<size(); i++) {
+        for (int i = 0; i < split_clusters->size(); i++) {
             clusters.push_back(split_clusters->at(i));
         }
         //clusters = split_clusters;
