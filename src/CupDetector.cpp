@@ -371,7 +371,7 @@ getColor( int seed )
 
 void CupDetector::split_clusters(
     const pcl::PointCloud<pcl::PointXYZRGB>::Ptr& cloud,
-    std::shared_ptr<std::vector<pcl::PointIndices>>& clusters,
+    std::vector<pcl::PointIndices>& clusters,
     const int& dim)
 {
     // input dimension validation
@@ -430,7 +430,11 @@ void CupDetector::split_clusters(
             }
         }
 
-        clusters = split_clusters;
+        clusters.clear();
+        for (auto& cluster : split_clusters) {
+            clusters.push_back(cluster);
+        }
+        //clusters = split_clusters;
     }
     catch(const std::exception& e)
     {
