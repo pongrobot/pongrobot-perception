@@ -84,7 +84,9 @@ pickTarget( )
         target_seq_id_++;
 
         // TODO: implement a real algorithm to pick the best target cup
-        target_cup_.pose = detection_array_.poses[0];
+        int random_cup_idx = rand() % detection_array_.poses.size();
+        ROS_INFO("Chose random detection index %i", random_cup_idx);
+        target_cup_.pose = detection_array_.poses[];
 
         // Transform the the command to launcher frame
         try
