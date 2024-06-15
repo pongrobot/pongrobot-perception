@@ -430,7 +430,7 @@ void SocketTelemetryNode::pt_cloudCallback( const pcl::PointCloud<pcl::PointXYZR
         }
         pt_cloud_string_buffer.assign((char*)pt_cloud_array, pt_cloud_length * sizeof(uint8_t));
         for (auto& connection : server.get_connections()) {
-            connection->send(pt_cloud_string_buffer,[](const SimpleWeb::error_code& ec){}, 130);
+            // connection->send(pt_cloud_string_buffer,[](const SimpleWeb::error_code& ec){}, 130);
         }  
     }
 }
