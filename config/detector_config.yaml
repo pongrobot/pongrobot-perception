@@ -16,7 +16,7 @@ cluster/max_cluster_size: 20000 # largest allowable point cluster
 
 # Cluster splitting parameters
 cluster_splitting/enabled: True # Whether to attempt to split clusters
-cluster_splitting/max_width_m: 0.11 # Max width in meters for a cluster before it gets split
+cluster_splitting/max_width_m: 0.09 # Max width in meters for a cluster before it gets split
 
 # Debugging flags
 debug/publish_table_cloud: True # Show the detected table in red

@@ -127,6 +127,14 @@ void SocketTelemetryNode::handleCommand(json& jsonMsg) {
         {
             nh_.setParam("/detector/cluster/max_cluster_size",value);
         }
+        if (key=="yaw-fudge-offset")
+        {
+            nh_.setParam("/launcher/yaw/fudge_offset",value);
+        }
+        if (key=="yaw-fudge-scalar")
+        {
+            nh_.setParam("/launcher/yaw/fudge_scalar",value);
+        }
         
         // send empty message std messages to /dector/restart
 
@@ -165,6 +173,8 @@ void SocketTelemetryNode::update()
     j["cluster-tolerance"]=nullptr;
     j["min-cluster-size"]=nullptr;
     j["max-cluster-size"]=nullptr;
+    j["yaw-fudge-offset"]=nullptr;
+    j["yaw-fudge-scalar"]=nullptr;
     j["topic"]="parameters";
     float passthrough_max_depth;
     if (nh_.getParam("/detector/filter/passthrough_max_depth", passthrough_max_depth))
@@ -210,6 +220,18 @@ void SocketTelemetryNode::update()
     if (nh_.getParam("/detector/cluster/max_cluster_size", max_cluster_size))
     {
         j["max-cluster-size"]=max_cluster_size;
+    }
+
+    float yaw_fudge_offset;
+    if (nh_.getParam("/launcher/yaw/fudge_offset", yaw_fudge_offset))
+    {
+        j["yaw-fudge-offset"]=yaw_fudge_offset;
+    }
+
+    float yaw_fudge_scalar;
+    if (nh_.getParam("/launcher/yaw/fudge_scalar", yaw_fudge_scalar))
+    {
+        j["yaw-fudge-scalar"]=yaw_fudge_scalar;
     }
 
 
